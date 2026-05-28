@@ -1,0 +1,137 @@
+\documentclass[sigplan, nonacm = true, natbib = false]{acmart}
+
+\usepackage{listings}
+
+\lstset{
+  basicstyle=\ttfamily\footnotesize,
+  columns=fullflexible,
+  keepspaces=true
+}
+
+\lstdefinestyle{metl}{
+  language=[Objective]Caml,
+  morekeywords={eff, handle, end, return, mask, forall, Effect, alias},
+  morecomment=[l]{--},
+  literate=
+    {->}{{$\to$}}2
+    {=>}{{$\Rightarrow$}}2
+    {()}{{()}}2
+}
+
+\lstdefinestyle{ocaml}{
+  language=[Objective]Caml,
+  morekeywords={},
+  literate=
+    {->}{{$\to$}}2
+    {=>}{{$\Rightarrow$}}2
+    {()}{{()}}2
+}
+
+\lstdefinestyle{koka}{
+  morekeywords={fun,rec,handler,forall},
+  sensitive=true,
+  morecomment=[l]{--},
+  morestring=[b]",
+  literate=
+    {->}{{$\to$}}2
+    {()}{{()}}2
+}
+
+\usepackage[backend=bibtex, style=numeric]{biblatex}
+\addbibresource{abstract.bib}
+\renewcommand*{\bibfont}{\footnotesize}
+
+%% Keywords
+
+\newcommand{\keyw}[1]{{\textbf{{\textsf{#1}}}}}
+\newcommand{\Do}{\keyw{do}\;}
+%%
+
+\title{Higher-order fork, modaly (Extended Abstract)}
+
+\settopmatter{authorsperrow=3}
+
+\author{Aghilas Y. Boussaa}
+\email{aghilas.boussaa@ens.fr}
+\affiliation{%
+  \institution{École normale supérieure -- PSL}
+  \country{France}
+}
+
+\author{Wenhao Tang}
+\orcid{0009-0000-6589-3821}
+\email{wenhao.tang@ed.ac.uk}
+\affiliation{%
+  \institution{The University of Edinburgh}
+  \country{UK}
+}
+
+\author{Sam Lindley}
+\orcid{0000-0002-1360-4714}
+\email{sam.lindley@ed.ac.uk}
+\affiliation{%
+  \institution{The University of Edinburgh}
+  \country{UK}}
+
+\keywords{effect handlers, effect types, modal types}
+
+\begin{document}
+\sloppy
+\begin{abstract}
+  Effect handlers are a programming construct allowing users to define and
+  combine computational effects. Various static type-and-effect systems can
+  guarantee safety. An effect of interest is cooperative
+  concurrency. Implementing it with a higher-order fork can show shortcomings of
+  such a system.
+
+  We review implementation of cooperative concurrency in existing languages, and
+  in a new one based on modal effect types.
+\end{abstract}
+\maketitle
+\section{Introduction}
+Effect handlers can express many control-flow constructs including cooperative
+concurrency~\cite{structuredasync2017}. One can model it with an effect with two
+operations \textsf{fork} and \textsf{yield} that, respectively create a new
+task and pause the current one. The languages we will consider here
+(\textsf{Effekt}~\cite[Example~10]{effekt2022},
+\textsf{Koka}~\cite{structuredasync2017, koka2014},
+\textsf{\textsc{Metl}}~\cite[Section~2.6]{tang2025modal}) can implement
+multitasking with a UNIX-style~\cite{hillerstrom2021thesis} \textsf{fork} which
+has type: $\textsf{fork} : \textsf{unit} \Rightarrow \textsf{bool}$. The
+continuation receives a boolean indicating whether its the parent or child, like
+in the following piece of \textsf{\textsc{Metl}} code.
+\begin{lstlisting}[style=metl]
+  if do fork () then
+    print "parent"
+  else
+    print "child"
+\end{lstlisting}
+However, this approach relies on \emph{multi-shot} continuations, while some
+existing languages that gain support for effect handlers only support
+\emph{single-shot} continuations~\cite{ocamleffect2021, wasmeffect2023}.
+
+One can still implement cooperative concurrency with effect handlers in
+\textsf{OCaml} which only supports single-shot
+continuation~\cite{dolan2015effective}. The \textsf{fork} operation has then the
+following signature.
+\begin{lstlisting}[style=ocaml]
+  type _ Effect.t += Fork : (unit -> unit) -> unit t
+\end{lstlisting}
+This operation takes as input a thunk of the computation which the new task
+should run. The scheduler maintains a queue of thunks that it runs. As
+\textsf{OCaml} has no static effect system, the implementation and the type
+signatures are straightforward.
+\section{Implementation in existing languages}
+We will now give an implementation of a cooperative concurrency with a
+\textsf{fork} that takes a thunk as input in several languages, focusing on the
+type signatures and some details of implementation. To demonstrate
+compositionality of the type-and-effect systems, we will suppose the existence
+of a parametric \textsf{queue} effect with two operations: \textsf{enqueue} and
+\textsf{dequeue}, and use it to store thunks.
+\subsection{\textsf{Koka}}
+\subsection{\textsf{Frank}}
+\subsection{\textsf{Effekt}}
+\subsection{\textsf{\textsc{Met}}}
+\section{Higher-order effects in \textsf{\textsc{Met}}}
+\printbibliography
+\end{document}
