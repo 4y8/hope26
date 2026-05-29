@@ -6,25 +6,25 @@ effect queue<a>
   ctl enqueue (x : a) : unit
   ctl dequeue () : maybe<a>
 
-
 div type proc<e>
   Proc (p :() -> <queue<proc<e>>,div|e> unit)
 
-fun scheduler(p : () -> <co<e>, queue<proc<e>>, div|e> unit) : <queue<proc<e>>,div|e> unit
-  with handler {
+fun run_next() : <queue<proc<e>>, div|e> unit
+  match dequeue()
+    Nothing -> ()
+    Just (Proc (p)) -> p()
+
+fun schedule(p : () -> <co<e>, queue<proc<e>>, div|e> unit) 
+    : <queue<proc<e>>,div|e> unit
+  with handler
     return (_)
-      match dequeue()
-        Nothing -> ()
-        Just (Proc (p')) -> p'()
+      run_next()
     ctl yield ()
       enqueue (Proc ({ resume (()) }))
-      match dequeue()
-        Nothing -> ()
-        Just (Proc (p')) -> p'()
+      run_next()
     ctl fork(p')
-      enqueue (Proc ({ scheduler({ mask<queue> (p') }) }))
+      enqueue (Proc ({ schedule({ mask<queue> (p') }) }))
       resume(())
-  }
   p ()
 
 fun main ()

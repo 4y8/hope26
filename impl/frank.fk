@@ -1,0 +1,22 @@
+data Maybe X = just X | nothing
+
+interface Co = fork : {[Co]Unit} -> Unit
+             | yield : Unit
+
+interface Queue S = enqueue : S -> Unit
+                  | dequeue : Maybe S
+
+data Proc = proc {[Queue Proc]Unit}
+
+runNext : {[Queue Proc]Unit}
+runNext! = case dequeue! { (just (proc x)) -> x!
+                         | nothing         -> unit }
+
+schedule : {<Co>Unit -> [Queue Proc]Unit}
+schedule <yield -> k>  = 
+  enqueue (proc {schedule (k unit)});
+  runNext!
+schedule <fork p -> k> =
+  enqueue (proc {schedule (<Queue> p!)});
+  schedule (k unit)
+schedule unit = runNext!

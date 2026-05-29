@@ -18,6 +18,13 @@
     {()}{{()}}2
 }
 
+\lstdefinestyle{frank}{
+  language=Haskell,
+  morekeywords={interface},
+  literate=
+    {->}{{$\to$}}2
+}
+
 \lstdefinestyle{ocaml}{
   language=[Objective]Caml,
   morekeywords={},
@@ -28,7 +35,7 @@
 }
 
 \lstdefinestyle{koka}{
-  morekeywords={fun,rec,handler,forall},
+  morekeywords={fun,rec,handler,forall, with, return, ctl, effect, div, type},
   sensitive=true,
   morecomment=[l]{--},
   morestring=[b]",
@@ -91,10 +98,10 @@
 \section{Introduction}
 Effect handlers can express many control-flow constructs including cooperative
 concurrency~\cite{structuredasync2017}. One can model it with an effect with two
-operations \textsf{fork} and \textsf{yield} that, respectively create a new
-task and pause the current one. The languages we will consider here
-(\textsf{Effekt}~\cite[Example~10]{effekt2022},
-\textsf{Koka}~\cite{structuredasync2017, koka2014},
+operations \textsf{fork} and \textsf{yield} that, respectively create a new task
+and pause the current one. The languages we will consider here
+(\textsf{Koka}~\cite{structuredasync2017, koka2014},
+\textsf{Frank}~\cite{frank2020}, \textsf{Effekt}~\cite[Example~10]{effekt2022},
 \textsf{\textsc{Metl}}~\cite[Section~2.6]{tang2025modal}) can implement
 multitasking with a UNIX-style~\cite{hillerstrom2021thesis} \textsf{fork} which
 has type: $\textsf{fork} : \textsf{unit} \Rightarrow \textsf{bool}$. The
@@ -128,10 +135,102 @@ type signatures and some details of implementation. To demonstrate
 compositionality of the type-and-effect systems, we will suppose the existence
 of a parametric \textsf{queue} effect with two operations: \textsf{enqueue} and
 \textsf{dequeue}, and use it to store thunks.
+
+All the implementations are in appendix and available \href{https://github.com/4y8/hope26}{online}.
 \subsection{\textsf{Koka}}
+\textsf{Koka} has a traditional type-and-effect system where each arrow type
+holds a scoped row~\cite{scopedrows2005} of effects the function can perform. We
+rely on effect polymorphism to store and yield effectful functions while
+pleasing the type system, modeling concurrency with this effect.
+\begin{lstlisting}[style=koka]
+  div effect co<e>
+    ctl yield () : unit
+    ctl fork (p : () -> <co<e>,div|e> unit) : unit
+\end{lstlisting}
+\textsf{Koka}'s positivity checker requires the \textsf{div} keyword before the
+declaration, and we propagate the \textsf{div} (which signals potential
+non-termination) effect throught all of our signatures. The type of processes is
+also effect-polymorphic:
+\begin{lstlisting}[style=koka]
+  div type proc<e>
+    Proc (p : () -> <queue<proc<e>>,div|e> unit).
+\end{lstlisting}
+With help from the alias \lstinline[style = koka]{qproc e = queue<proc<e>>}, we
+can implement a scheduler with type:
+\begin{lstlisting}[style=koka]
+  (() -> <co<e>, qproc<e>, div|e> unit) ->
+    <qproc<e>,div|e> unit,
+\end{lstlisting}
+which becomes 
+\begin{lstlisting}[style=koka]
+  (() -> <co<e>, qproc<e>|e> unit) -> <qproc<e>|e> unit,
+\end{lstlisting}
+if we forget the \textsf{div} effect.
 \subsection{\textsf{Frank}}
+Noticing that the trailing effect variable is often the same through a
+signature, the \textsf{Frank}~\cite{frank2020} language gives syntactic sugar
+allowing users to omit them.
+
+The paper cited above has a concurrency example in Section~6 which we transcribe
+here. The concurrency effect has signature:
+\begin{lstlisting}[style=Frank]
+  interface Co = fork : {[Co]Unit} -> Unit
+               | yield : Unit
+\end{lstlisting}
+where \lstinline[style=Frank]!{[Co]Unit}!  corresponds to a thunk with effect
+\lstinline[style=Frank]{Co}. By defining the type \lstinline[style=Frank]{Proc}
+to be \lstinline[style=Frank]!proc {[Queue Proc]Unit}!, we can implement a
+scheduler with the following variable-free type.
+\begin{lstlisting}[style=Frank]
+  {<Co>Unit -> [Queue Proc]Unit}
+\end{lstlisting}
+The type checker desugars this type to:
+\begin{lstlisting}[style = Frank]
+  {<Co e>Unit -> [Queue (Proc e), e]Unit}.
+\end{lstlisting}
 \subsection{\textsf{Effekt}}
 \subsection{\textsf{\textsc{Met}}}
+Drawing inspiration from Multimodal Type Theory~\cite{mtt2020}, modal effect
+types~\cite{tang2025modal, tang2026modal} use \emph{modalities} to give a robust
+version of \textsf{Frank}'s idea of \emph{ambient ability}, called the
+\emph{ambient effect context}, eliminating effect variables. To guarantee effect
+safety, operations can only yield values whose meaning is independant from the
+ambient effect context, which is not the case of arrow types, as they may use
+any effect available. Yielding a function is only possible by first boxing it in
+an \emph{absolute} modality that fixes the set of effects it can
+perform. However, to use the \textsf{co} effect with others, we cannot fix a set
+of effects and need to bring back effect
+variables~\cite[Section~2.10]{tang2025modal}.
+\begin{lstlisting}[style=metl]
+  eff co (e : Effect)
+    = fork : [co e, e](unit -> unit) => unit
+    | yield : unit => unit
+\end{lstlisting}
+We define the polymorphic type $\textsf{proc}$ of processes like in
+\textsf{Koka}.
+\begin{lstlisting}[style=metl]
+  type proc (e : Effect) =
+    Proc of [queue (proc e), e](unit -> unit).
+\end{lstlisting}
+Then, the \textsf{scheduler} has type:
+\begin{lstlisting}[style=metl]
+  forall (e : Effect) . [queue (proc e), e]
+    ([co e, queue (proc e), e](unit -> unit) -> unit),
+\end{lstlisting}
+
+This type signature reminds the \textsf{Koka} one, erasing all the benefits of
+modal effect types, as each arrow comes with an absolute modality. Moreover, the
+implementation relies on a \emph{modality-parametrised
+handler}~\cite[Section~3.5]{tang2026modal} to give a type with an absolute
+modality to the continuation. This extra annotation brings extra burden compared
+to \textsf{Koka}.
 \section{Higher-order effects in \textsf{\textsc{Met}}}
 \printbibliography
+\appendix
+\section{\textsf{Koka}}
+\lstinputlisting[style=koka]{impl/koka.kk}
+\section{\textsf{Frank}}
+\lstinputlisting[style=frank]{impl/frank.fk}
+\section{\textsf{\textsc{Metl}} with effect variables}
+\lstinputlisting[style=metl]{impl/metl-eff-var.met}
 \end{document}

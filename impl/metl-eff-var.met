@@ -1,0 +1,32 @@
+type unit = Unit
+
+eff co (e : Effect)
+  = fork : [co e, e]{unit} => unit
+  | yield : unit => unit
+
+
+eff queue [s]
+  = enqueue : s => unit
+  | dequeue : unit => option s
+
+type proc (e : Effect) = Proc of [queue (proc e), e]{unit}
+
+val wakeProc : forall (e : Effect) . [queue (proc e), e]{unit}
+let wakeProc! =
+  match do dequeue () with
+  | Some (Proc (x)) -> x!
+  | None -> ()
+  end
+
+val schedule : forall (e : Effect) .
+  [queue (proc e), e]([co e, queue (proc e), e]{unit} -> unit)
+let schedule c =
+  handle<co e>[queue (proc e), e] c! with
+  | return () => (wakeProc @e)!
+  | yield () k =>
+    do enqueue (Proc (k));
+    (wakeProc @e)!
+  | fork p k =>
+    do enqueue (Proc ({schedule @e {mask<queue> (p!)}}));
+    k!
+  end
