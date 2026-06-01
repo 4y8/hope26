@@ -4,7 +4,6 @@ eff co (e : Effect)
   = fork : [co e, e]{unit} => unit
   | yield : unit => unit
 
-
 eff queue [s]
   = enqueue : s => unit
   | dequeue : unit => option s
