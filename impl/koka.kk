@@ -23,8 +23,9 @@ fun schedule(p : () -> <co<e>, queue<proc<e>>, div|e> unit)
       enqueue (Proc ({ resume (()) }))
       run_next()
     ctl fork(p')
-      enqueue (Proc ({ resume(()) }))
-      schedule({ mask<queue> (p') })
+      enqueue (Proc ({ schedule({ mask<queue> (p') })}))
+      resume(())
+      
   p ()
 
 

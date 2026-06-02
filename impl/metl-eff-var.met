@@ -28,6 +28,6 @@ let schedule c =
     do enqueue (Proc (k));
     (wakeProc @e)!
   | fork p k =>
-    do enqueue (Proc (k));
-    schedule @e {mask<queue> (p!)}
+    do enqueue (Proc ({schedule @e {mask<queue> (p!)}}));
+    k!
   end
