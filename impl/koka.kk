@@ -25,12 +25,12 @@ fun schedule(p : () -> <co<e>, queue<proc<e>>, div|e> unit)
     ctl fork(p')
       enqueue (Proc ({ schedule({ mask<queue> (p') })}))
       resume(())
-      
   p ()
 
 
 // BEGIN: code for running examples
-fun run_queue<a>(action : () -> <queue<a>,div|e> b) : <div|e> b
+fun run_queue<a>(action : () -> <queue<a>,div|e> b)
+    : <div|e> b
   var q := []
   handle action
     return(x) x
@@ -43,10 +43,11 @@ fun run_queue<a>(action : () -> <queue<a>,div|e> b) : <div|e> b
           q := xs
           Just(x)
 
-fun scheduler(p : () -> <co<e>,queue<proc<e>>,div|e> unit) : <div|e> unit
-  run_queue { schedule(p) }
+fun full_schedule(p : () -> <co<e>,div|e> unit)
+    : <div|e> unit
+  run_queue { schedule({ mask<queue> (p) }) }
 
-fun example() : <co<<console>>,queue<proc<<console>>>,console,div> unit
+fun example() : <co<<console>>,console, div> unit
   println("main: start")
   fork(fn()
     println("child: before yield")

@@ -35,9 +35,9 @@
 }
 
 \lstdefinestyle{koka}{
-  morekeywords={fun,rec,handler,forall, with, return, ctl, effect, div, type},
+  morekeywords={fun,rec,handler,forall, with, return, ctl, effect, div, type, fn, console},
   sensitive=true,
-  morecomment=[l]{--},
+  morecomment=[l]{//},
   morestring=[b]",
   literate=
     {->}{{$\to$}}2
@@ -87,13 +87,15 @@
 \begin{abstract}
   Effect handlers are a programming construct allowing users to define and
   combine computational effects, such as cooperative concurrency. To add
-  handlers while guaranteeing safety, one can use a static type-and-effect
-  system. Implementing cooperative concurrency with a higher-order fork can show
-  shortcomings of such a system.
+  handlers without compromising safety, one can use a static type-and-effect
+  system. The implementation of cooperative concurrency with a higher-order fork
+  reveals limitations of such a system.
 
-  We review implementations of cooperative concurrency in existing
-  languages. This motivates the development of a new language based on modal
-  effect types which we also use to implement this example.
+  We first illustrate these limitations by implementing cooperative concurrency
+  in four existing languages. We then present a new language based on modal
+  effect types, which we use to implement cooperative concurrency with a
+  higher-order fork.
+  
 \end{abstract}
 \maketitle
 \section{Introduction}
@@ -121,20 +123,26 @@ existing languages that gain support for effect handlers only support
 One can still implement cooperative concurrency with effect handlers in
 \textsf{OCaml} even though it only supports single-shot
 continuation~\cite{dolan2015effective, ocamleffect2021}. The \textsf{fork}
-operation has then the following signature.
+operation has then this signature.
 \begin{lstlisting}[style=ocaml]
   type _ Effect.t += Fork : (unit -> unit) -> unit t
 \end{lstlisting}
 This operation takes as input a thunk of the computation which the new task
 should run. The scheduler maintains a queue of thunks that it runs. As
-\textsf{OCaml} has no static effect system, the implementation and the type
-signatures are straightforward.
+\textsf{OCaml} has no static effect system, the type signatures are
+straightforward.
+
+We present implementations of a scheduler for cooperative concurrency with
+higher-order fork in \textsf{Koka}, \textsf{Frank}, \textsf{Effekt} and
+\textsf{\textsc{Metl}}. Then, we overview a new way to express higher-order
+effects with modal effect types and use a language based on it to implement such
+a scheduler.
 \section{Implementation in existing languages}
 We will now overview implementations of a cooperative concurrency effect with a
-\textsf{fork} that takes a thunk as input, in several languages. To demonstrate
-compositionality of the type-and-effect systems, schedulers will use a
-parametric \textsf{queue} effect with two operations (\textsf{enqueue} and
-\textsf{dequeue}) to store thunks.
+\textsf{fork} that takes a thunk as input. To demonstrate compositionality of
+the type-and-effect systems, schedulers will use a parametric \textsf{queue}
+effect with two operations (\textsf{enqueue} and \textsf{dequeue}) to store
+thunks.
 
 All the implementations are in appendix and available
 \href{https://github.com/4y8/hope26}{online}.
@@ -160,17 +168,17 @@ With help from the alias \lstinline[style = koka]{qproc e = queue<proc<e>>}, we
 can implement a scheduler with type:
 \begin{lstlisting}[style=koka]
   (() -> <co<e>, qproc<e>, div|e> unit) ->
-    <qproc<e>,div|e> unit,
+    <qproc<e>,div|e> unit
 \end{lstlisting}
 which becomes 
 \begin{lstlisting}[style=koka]
-  (() -> <co<e>, qproc<e>|e> unit) -> <qproc<e>|e> unit,
+  (() -> <co<e>, qproc<e>|e> unit) -> <qproc<e>|e> unit
 \end{lstlisting}
-if we forget the \textsf{div} effect.
+if we remove the \textsf{div} effect.
 \subsection{\textsf{Frank}}
 Noticing that the trailing effect variable is often the same through a
 signature, the \textsf{Frank}~\cite{frank2020} language gives syntactic sugar
-allowing users to omit them.
+allowing users to omit effect variables.
 
 The paper cited above has a concurrency example in Section~6 which we transcribe
 here. The corresponding effect has signature:
@@ -192,8 +200,8 @@ The type checker desugars this type to:
 
 But this approach is not satisfying as it only relies on syntax.
 \subsection{\textsf{Effekt}}
-We have not managed yet to implement our example in
-\textsf{Effekt}~\cite{effekt2020, effekt2022}.
+\textsf{Effekt}~\cite{effekt2020, effekt2022} takes another path to avoid
+cluttering type signatures with effect variables. 
 \subsection{\textsf{\textsc{Metl}}}
 Drawing inspiration from Multimodal Type Theory~\cite{mtt2020}, modal effect
 types~\cite{tang2025modal, tang2026modal} use \emph{modalities} to give a robust
@@ -215,12 +223,12 @@ We define the polymorphic type $\textsf{proc}$ of processes like in
 \textsf{Koka}.
 \begin{lstlisting}[style=metl]
   type proc (e : Effect) =
-    Proc of [queue (proc e), e](unit -> unit).
+    Proc of [queue (proc e), e](unit -> unit)
 \end{lstlisting}
-Then, the \textsf{scheduler} has type:
+Then, the \textsf{scheduler} has type.
 \begin{lstlisting}[style=metl]
   forall (e : Effect) . [queue (proc e), e]
-    ([co e, queue (proc e), e](unit -> unit) -> unit),
+    ([co e, queue (proc e), e](unit -> unit) -> unit)
 \end{lstlisting}
 
 This type signature reminds the \textsf{Koka} one, erasing all the benefits of
@@ -242,7 +250,7 @@ With these new rules, we can define the \textsf{co} effect as follows.
           | yield : unit => unit
 \end{lstlisting}
 The bang indicates that \textsf{co} is a higher-order operation. Unlike in
-previous examples, the signature of \textsf{fork} does not mention the
+previous implementations, the signature of \textsf{fork} does not mention the
 \textsf{co} effect. In fact, the thunk will have the same ambient effect context
 as the computation that yielded it, which contains effect \textsf{co}. For the
 same reason, we do not need a distinct type of processes and can use
