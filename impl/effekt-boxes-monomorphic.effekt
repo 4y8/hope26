@@ -1,0 +1,52 @@
+import dequeue
+
+interface Co {
+  def yield(): Unit
+  def fork(p: () => Unit / Co at {io}): Unit
+  // Method 1: Box the argument `p` of fork. As a result, we have to
+  // explicitly mention the other capabilities used by it (`io` in
+  // this example). Effekt does not support capability polymorphism,
+  // so we cannot abstract over what other capabilities may be
+  // performed by child processes.
+  }
+
+def scheduler(prog: () => Unit / Co at {io}) = region this {
+  var queue: Dequeue[() => Unit at {this, io}] in this = emptyQueue();
+
+  def run_next(): Unit = queue.popBack match {
+    case None() => ()
+    case Some((p, q)) =>
+      queue = q
+      p()
+  }
+
+  def schedule(proc: () => Unit / Co at {io}): Unit = {
+    try { proc() } with Co {
+      def yield() = {
+        queue = queue.pushFront(box { resume(()) });
+        run_next()
+      }
+      def fork(child) = {
+        queue = queue.pushFront(box { resume(()) });
+        schedule(child)
+      }
+    };
+    run_next()
+  }
+
+  schedule(prog)
+}
+
+def main() = {
+  scheduler(box {
+    println("main: start")
+    do fork(box {
+      println("child: before yield")
+      do yield()
+      println("child: after yield")
+    })
+    println("main: after fork")
+    do yield()
+    println("main: after yield")
+  })
+}

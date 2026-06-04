@@ -1,0 +1,68 @@
+import dequeue
+
+interface Co {
+  def yield(): Unit
+  def abort(): Nothing
+  def forkOp { p: () => Unit }: Unit
+  // Method 2: Use bidirectional effects of Effekt. The argument `p`
+  // is given a block type which may use any other capabilities from
+  // where it is called. The handler passes the child process to the
+  // continuation to make sure the child process is ran in scope of
+  // these capabilities. As a cost of using bidirectional effects, we
+  // have to introduce an abort operation and calls this operation
+  // when the child process ends; otherwise the parent process may be
+  // accidentally ran after the child process (because we pass the
+  // child to the continuation).
+  }
+
+def fork { p: => Unit / Co }: Unit / Co =
+  do forkOp {
+    p();
+    do abort()
+  }
+
+def scheduler { prog: => Unit / Co } = region this {
+  var queue: Dequeue[() => Unit at {this, prog}] in this = emptyQueue();
+
+  def run_next(): Unit = queue.popBack match {
+    case None() => ()
+    case Some((p, q)) =>
+      queue = q
+      p()
+  }
+
+  def schedule(): Unit = {
+    try { prog() } with Co {
+      def yield() = {
+        queue = queue.pushFront(box { resume(()) });
+        run_next()
+      }
+      def forkOp() = {
+        queue = queue.pushFront(box {
+          resume { {child: () => Unit} => () }
+        });
+        resume { {child: () => Unit} =>
+          child()
+        }
+      }
+      def abort() = ()
+    };
+    run_next()
+  }
+
+  schedule()
+}
+
+def main() = {
+  scheduler {
+    println("main: start")
+    fork {
+      println("child: before yield")
+      do yield()
+      println("child: after yield")
+    }
+    println("main: after fork")
+    do yield()
+    println("main: after yield")
+  }
+}
