@@ -31,3 +31,46 @@ let schedule c =
     do enqueue (Proc ({schedule @e {mask<queue> (p!)}}));
     k!
   end
+
+
+type list a = Nil | Cons of a, list a
+
+val append : forall a . [](list a -> list a -> list a)
+let append l l' =
+  match l with
+  | Nil -> l'
+  | Cons (hd, tl) -> Cons (hd, append @a tl l')
+  end
+
+val run_queue : forall [a] .
+  [](<queue a>{unit} -> (list a) -> unit)
+let run_queue m =
+  handle m! with
+  | return x => fun q -> x
+  | enqueue x k =>
+    fun q -> k () (append @a q (Cons (x, Nil)))
+  | dequeue () k =>
+    fun q ->
+      match q with
+      | Nil -> k None Nil
+      | Cons (x, xs) -> k (Some (x)) xs
+      end
+  end
+
+val example : [co]{unit}
+let example! =
+  print "main: start";
+  do fork { print "child: before yield";
+            do yield ();
+	    print "child: after yield" };
+  print "main: after fork";
+  do yield ();
+  print "main: after yield"
+
+val full_schedule : forall (e : Effect) .
+  [e]([co e, e]{unit} -> unit)
+let full_schedule m =
+  run_queue @(proc e) (schedule @e { mask<queue> (m!) })
+
+val main : unit
+let main = full_schedule @[] example

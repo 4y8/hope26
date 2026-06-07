@@ -5,14 +5,17 @@ interface Co[A, B] {
   def fork(p: Process[A, B]): Unit
 }
 
-type Process[A, B] = ({ cap: A => B } => (() => Unit / Co[A, B] at {cap})) at {}
-// Method 3: Abstract over the other capabilities explicitly for the
-// child process. This provides some ability to simulate how effect
-// polymorphism works. As a result, we need to explicitly pass cap in
-// the handler.
+type Process[A, B] =
+  ({ cap: A => B } => (() => Unit / Co[A, B] at {cap})) at {}
+// Method 3: Abstract over the other capabilities explicitly
+// for the child process. This provides some ability to
+// simulate how effect polymorphism works. As a result, we
+// need to explicitly pass cap in the handler.
 
-def scheduler[A, B](prog: Process[A, B]) { cap: A => B } = region this {
-  var queue: Dequeue[() => Unit at {this, cap}] in this = emptyQueue();
+def scheduler[A, B](prog: Process[A, B]) { cap: A => B } =
+  region this {
+  var queue: Dequeue[() => Unit at {this, cap}] in this =
+    emptyQueue();
 
   def run_next(): Unit = queue.popBack match {
     case None() => ()

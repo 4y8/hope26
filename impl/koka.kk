@@ -60,4 +60,4 @@ fun example() : <co<<console>>,console, div> unit
 // END: code for running examples
 
 fun main ()
-  scheduler(example)
+  full_schedule(example)

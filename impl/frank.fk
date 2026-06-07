@@ -20,3 +20,25 @@ schedule <fork p -> k> =
   enqueue (proc {schedule (<Queue> p!)});
   schedule (k unit)
 schedule unit = runNext!
+
+run_queue : {<Queue S>X -> List S -> X}
+run_queue <dequeue -> k> [] = run_queue (k nothing) []
+run_queue <dequeue -> k> (x :: xs) = run_queue (k (just x)) xs
+run_queue <enqueue x -> k) xs = run_queue (k ()) (x :: xs)
+
+full_schedule : {<Co>Unit -> Unit}
+full_schdule m = run_queue (shedule (<Queue> m!))
+
+example : {[Co, Console]Unit}
+example! =
+  print "main: start";
+  fork { print "child: before yield";
+         yield!;
+	 print "child: after yield" };
+  print "main: after fork";
+  yield!
+  print "main: after yield"
+
+main : {[Co]Unit}
+main! =
+  full_schedule example
