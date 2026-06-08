@@ -65,6 +65,20 @@
 \newcommand{\Do}{\keyw{do}\;}
 %%
 
+
+%% Margin notes.
+%% For submission, comment all the following lines out ...
+\paperwidth    =\dimexpr\paperwidth     + 4cm\relax
+\oddsidemargin =\dimexpr\oddsidemargin  + 2cm\relax
+\evensidemargin=\dimexpr\evensidemargin + 2cm\relax
+\marginparwidth=\dimexpr\marginparwidth + 2.2cm\relax
+\usepackage{todonotes,setspace}
+\newcommand{\todobox}[3]{{\todo[color=#1!20,bordercolor=#1!80]{%
+  \begin{spacing}{0.9}\footnotesize\textbf{#2:} #3\end{spacing}}}}
+\newcommand{\wenhao}[1]{\todobox{blue}{Wenhao}{#1}}
+%% ... up to here
+
+
 \title{Higher-order fork, modally}
 
 \settopmatter{authorsperrow=3}
@@ -283,6 +297,11 @@ from the continuation's argument. To continue the parent computation only once,
   
 None of the implementations above use an effect for the queue.
 \section{Higher-order effects in \textsc{Met}}
+%
+\wenhao{We may want to elaborate on how MET works and how the new
+approach works, and perhaps save some space by cutting off some texts
+from Frank and Effekt sections.}
+%
 The unsatisfactory solution in \textsc{Metl} motivates the search for new ways
 to extend the core calculus to support polymorphic higher-order effects. We
 have implemented a promising approach: relax kind restrictions on operations’
@@ -301,7 +320,12 @@ previous implementations, the signature of \textsf{fork} does not mention the
 \textsf{co} effect. In fact, the thunk will have the same ambient effect context
 as the computation that yielded it, which contains effect \textsf{co}. For the
 same reason, there is no need for a distinct type of processes and can use
-functions. The scheduler does not rely modality-paramterised handler and has the
+functions.
+%
+\wenhao{In the previous implementation we can also just inline the
+type of \lstinline{proc}.}
+%
+The scheduler does not rely on modality-paramterised handler and has the
 following type.
 \begin{lstlisting}[style=metl]
   [queue (unit -> unit)](<co>(unit -> unit) -> unit)
