@@ -63,7 +63,11 @@
 
 \newcommand{\keyw}[1]{{\textbf{{\textsf{#1}}}}}
 \newcommand{\Do}{\keyw{do}\;}
-%%
+
+\usepackage{fontawesome5}
+\newcommand{\lock}{\textsf{\scriptsize\faLock}}
+
+\usepackage{mathpartir}
 
 \title{Higher-order fork, modally}
 
@@ -111,13 +115,11 @@
 \maketitle
 \section{Introduction}
 Effect handlers can express many control-flow constructs. One example is
-cooperative concurrency~\cite{structuredasync2017} which can be modelled using
+cooperative concurrency~\cite{structuredasync2017}, which can be modelled using
 an effect with two operations \textsf{fork} and \textsf{yield} that,
 respectively, create a new task and pause the current one. The languages we will
-consider here (Koka~\cite{structuredasync2017, koka2014},
-Frank~\cite{frank2020}, Effekt~\cite[Example~10]{effekt2022},
-\textsc{Metl}~\cite[Section~2.6]{tang2025modal}) implement multitasking with a
-UNIX-style fork of type $\textsf{unit} \Rightarrow
+consider here implement multitasking with a UNIX-style fork of type
+$\textsf{unit} \twoheadrightarrow
 \textsf{bool}$~\cite{hillerstrom2021thesis}. The continuation receives a boolean
 indicating whether it is the parent or child, like in the following piece of
 \textsc{Metl} code.
@@ -127,13 +129,14 @@ indicating whether it is the parent or child, like in the following piece of
   else
     print "child"
 \end{lstlisting}
-This approach relies on multi-shot continuations, but some existing languages
-that start supporting effect handlers only support single-shot
-continuations~\cite{ocamleffect2021, wasmeffect2023}.
+The approach above to multitasking relies on multi-shot continuations, but most
+existing languages that start supporting effect handlers only support
+single-shot continuations~\cite{ocamleffect2021, wasmeffect2023}.
 
 One can still implement cooperative concurrency with effect handlers in OCaml
-even though it only supports single-shot continuation~\cite{dolan2015effective,
-  ocamleffect2021}. Fork has then this signature.
+using another approach, even though it only supports single-shot
+continuation~\cite{dolan2015effective, ocamleffect2021}. The fork operation has
+then this signature.
 \begin{lstlisting}[style=ocaml]
   type _ Effect.t += Fork : (unit -> unit) -> unit t
 \end{lstlisting}
@@ -142,7 +145,7 @@ should run. The scheduler maintains a queue of thunks that it runs. As OCaml has
 no static effect system, the type signatures are straightforward.
 
 We present implementations of a scheduler for cooperative concurrency with
-higher-order fork in Koka, Frank, Effekt and \textsc{Metl}. Then, we overview a
+higher-order fork in Koka, Frank, Effekt and \textsc{Metl}. Then, we introduce a
 new way to express higher-order effects with modal effect types and use a
 language based on it to implement such a scheduler.
 \section{Implementation in four languages}\label{impl}
@@ -230,7 +233,7 @@ We define the polymorphic type of processes like in Koka.
   type proc (e : Effect) =
     Proc of [queue (proc e), e](unit -> unit)
 \end{lstlisting}
-Then, the scheduler has type.
+Then, the scheduler has the following type.
 \begin{lstlisting}[style=metl]
   forall (e : Effect) . [queue (proc e), e]
     ([co e, queue (proc e), e](unit -> unit) -> unit)
@@ -290,7 +293,7 @@ operands, but restrict subeffecting in presence of non-absolute types. These
 conditions should ensure that a non-absolute value arrives to an effect context
 more permessive than the one it comes from.
 
-With these new rules, the following declaration is well-typed and models
+With these new rules, the declaration below is well-typed and models
 concurrency.
 \begin{lstlisting}[style=metl]
   eff! co = fork : (unit -> unit) => unit
@@ -327,8 +330,6 @@ system with the one with effect variables.
 \lstinputlisting[style=frank]{impl/frank.fk}
 \section{\textsc{Metl} with effect variables}
 \lstinputlisting[style=metl]{impl/metl-eff-var.met}
-\section{\textsc{Metl} with higher-order effects}
-\lstinputlisting[style=metl]{impl/metl-ho-eff.met}
 \section{Effekt}
 \subsection{Boxed functions}
 \lstinputlisting[style = effekt]{impl/effekt-boxes.effekt}
@@ -336,8 +337,8 @@ system with the one with effect variables.
 \lstinputlisting[style = effekt]{impl/effekt-bieff-with-abort.effekt}
 \subsection{Additional comments}
 The version with bidirectional effects resumes the continuation twice. Effekt's
-type system reject the following handler for \textsf{forkOp}, which would only
-require resuming once, because the capability \texttt{\small child} is
+type system reject the following handler for \texttt{\small forkOp}, which would
+only require resuming once, because the capability \texttt{\small child} is
 incompatible with the queue.
 \begin{lstlisting}[style = effekt]
   def forkOp() =
@@ -346,5 +347,81 @@ incompatible with the queue.
       () }
 \end{lstlisting}
 Such a handler, would remove the need for the wrapper. 
+\section{\textsc{Metl} with higher-order effects}
+\subsection{Implementation}
+\lstinputlisting[style=metl]{impl/metl-ho-eff.met}
+\subsection{Theory}
+The syntax annotates each effect type with an \emph{accidental}: a flat
+signature $A\twoheadrightarrow^\flat B$ has operands of absolute types, and a
+sharp signature $A\twoheadrightarrow^\sharp B$ has no restriction. Effect
+contexts and extensions are scoped rows of labels that a context map to
+signatures.
+\begin{center}
+\begin{tabular}{ l r c l }
+  Accidentals & $Y$ & ::= & $\flat\mid\sharp$\\
+  Extensions & $D$ & ::= & $\cdot\mid\ell,D$\\
+  Effect Contexts & $E,F$ & ::= & $\cdot\mid\ell,E$\\
+  Label Contexts & $\Sigma$ & ::= &
+  $\cdot\mid\ell:A\twoheadrightarrow^Y B,\Sigma$\\ 
+\end{tabular}
+\end{center}
+The extension equivalence rules fix the position of sharp signatures. Effect
+context equivalence obeys the same rules. All of the following rules suppose a
+the existence of global label context $\Sigma$.
+\begin{mathpar}
+  \inferrule{\\}{\cdot\equiv\cdot}
 
+  \inferrule{D_1\equiv D_2\\ D_2\equiv D_3}{D_1\equiv D_3}
+
+  \inferrule{D_1\equiv D_2}{\ell, D_1\equiv \ell, D_2}
+
+  \inferrule{\ell\neq \ell'\\ \ell:\flat\\ \ell':\flat}
+    {\ell, \ell', D \equiv \ell', \ell, D}
+\end{mathpar}
+Subeffecting of extensions allows moving sharp labels backward.
+\begin{mathpar}
+  \inferrule{\\}{\cdot\leqslant\cdot}
+
+  \inferrule{D_1\leqslant D_2\\ D_2\leqslant D_3}{D_1\leqslant D_3}
+
+  \inferrule{D_1\leqslant D_2}{\ell, D_1\leqslant \ell, D_2}
+
+  \inferrule{\ell\neq \ell'\\ \ell:\flat}
+    {\ell, \ell', D \leqslant \ell', \ell, D}
+\end{mathpar}
+For subeffecting, effect contexts follow the same rules as extensions with the
+addition of $\cdot\leqslant E$.
+
+The rules for $\keyw{do}$ ensure that a sharp operation is unavailable if not
+first of the ambient effect context.
+\begin{mathpar}
+  \inferrule[\textsc{T-DoFlat}]
+    {E = D,\ell,F\\
+     \ell\not\in D\\
+     \Sigma\ni\ell:A\twoheadrightarrow^\flat B\\
+     \Gamma\vdash N:A \;@\; E}
+    {\Gamma\vdash\Do\ell\; N:B \;@\; E}
+
+  \inferrule[\textsc{T-DoSharp}]
+    {\Sigma\ni\ell:A\twoheadrightarrow^\sharp B\\
+     \Gamma\vdash N:A \;@\; \ell,E}
+    {\Gamma\vdash\Do\ell\; N:B \;@\; \ell,E}
+\end{mathpar}
+
+To simplify the rules, we restrict each handler to a single operation. The rule
+\textsc{T-HandleSharp} wraps the operands of sharp operations with extension
+modalities.
+\begin{mathpar}
+  \inferrule[\textsc{T-HandleSharp}]
+    {\Gamma,\lock_{{\langle|\ell\rangle}_E}\vdash M:A\;@\;\ell,F\\
+     \Sigma\ni\ell:A'\twoheadrightarrow^\sharp B'\\
+     \Gamma, x:\langle\ell\rangle A\vdash N:B\; @\; F\\
+     \Gamma, p:\langle\ell\rangle A', r:\langle\ell\rangle B'\to B\vdash
+     N':B\; @\; F
+    }
+    {\keyw{handle } M\keyw{ with }
+     \{\keyw{return }x\mapsto N,\ell\;p\;r\mapsto N'\}
+     : B\; @\; F}
+\end{mathpar}
+Handling flat operation works the same way as usual \textsc{Met}.
 \end{document}
