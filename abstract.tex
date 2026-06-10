@@ -67,8 +67,6 @@
 \usepackage{fontawesome5}
 \newcommand{\lock}{\textsf{\scriptsize\faLock}}
 
-\usepackage{mathpartir}
-
 
 %% Margin notes.
 %% For submission, comment all the following lines out ...
@@ -82,6 +80,7 @@
 \newcommand{\wenhao}[1]{\todobox{blue}{Wenhao}{#1}}
 %% ... up to here
 
+\usepackage{mathpartir}
 
 \title{Higher-order fork, modally}
 
@@ -323,12 +322,7 @@ previous implementations, the signature of \textsf{fork} does not mention the
 \textsf{co} effect. In fact, the thunk will have the same ambient effect context
 as the computation that yielded it, which contains effect \textsf{co}. For the
 same reason, there is no need for a distinct type of processes and can use
-functions.
-%
-\wenhao{In the previous implementation we can also just inline the
-type of \lstinline{proc}.}
-%
-The scheduler does not rely on modality-paramterised handler and has the
+functions. The scheduler does not rely modality-paramterised handler and has the
 following type.
 \begin{lstlisting}[style=metl]
   [queue (unit -> unit)](<co>(unit -> unit) -> unit)
@@ -371,6 +365,11 @@ incompatible with the queue.
       () }
 \end{lstlisting}
 Such a handler, would remove the need for the wrapper. 
+
+We have not managed to use a queue effect to store our thunks. To do so, we
+would need to store in a queue a thunk that captures the queue capabality
+itself. However, we could not implement such a queue while staying in Effekt's
+lexical requirements.
 \section{\textsc{Metl} with higher-order effects}
 \subsection{Implementation}
 \lstinputlisting[style=metl]{impl/metl-ho-eff.met}
