@@ -78,6 +78,7 @@
 \newcommand{\todobox}[3]{{\todo[color=#1!20,bordercolor=#1!80]{%
   \begin{spacing}{0.9}\footnotesize\textbf{#2:} #3\end{spacing}}}}
 \newcommand{\wenhao}[1]{\todobox{blue}{Wenhao}{#1}}
+\newcommand{\aghilas}[1]{\todobox{blue}{Aghilas}{#1}}
 %% ... up to here
 
 \usepackage{mathpartir}
@@ -160,7 +161,7 @@ no static effect system, the type signatures are straightforward.
 We present implementations of a scheduler for cooperative concurrency with
 higher-order fork in Koka, Frank, Effekt and \textsc{Metl}. Then, we introduce a
 new way to express higher-order effects with modal effect types and use a
-language based on it to implement such a scheduler.
+language following it to implement such a scheduler.
 \section{Implementation in four languages}\label{impl}
 We will now overview implementations of a cooperative concurrency effect with a
 fork that takes a thunk as input. To demonstrate compositionality of the
@@ -183,8 +184,8 @@ system.
 \end{lstlisting}
 Koka's positivity checker requires the \textsf{div} keyword before the
 declaration, and we propagate the \textsf{div} effect, which signals potential
-non-termination, through all the signatures. The type of processes is also
-effect-polymorphic:
+non-termination, through all the signatures. The recursive type of processes is
+also effect-polymorphic:
 \begin{lstlisting}[style=koka]
   div type proc<e>
     Proc (p : () -> <queue<proc<e>>,div|e> unit)
@@ -218,6 +219,7 @@ the scheduler has the following variable-free type.
 \begin{lstlisting}[style=Frank]
   {<Co>Unit -> [Queue Proc]Unit}
 \end{lstlisting}
+\aghilas{should we remove that}
 The type checker desugars this type to:
 \begin{lstlisting}[style = Frank]
   {<Co e>Unit -> [Queue (Proc e), e]Unit}
@@ -227,14 +229,16 @@ But Frank's approach is unsatisfactory as it only relies on syntax.
 \subsection{\textsc{Metl}}
 Drawing on Multimodal Type Theory~\cite{mtt2020}, modal effect types use
 \emph{modalities} to give a robust version of Frank's idea of \emph{ambient
-ability}, called the \emph{ambient effect context}, and eliminate effect
-variables~\cite{tang2025modal, tang2026modal}. To ensure effect safety,
-operations can only yield values whose meaning is independent from the ambient
-effect context, which is not the case of arrow types, as they may use any effect
-in the context. Yielding a function is only possible by first boxing it in an
-\emph{absolute} modality that fixes the set of effects it can perform. However,
-to be able to compose cooperative concurrency with any effect, we cannot fix a
-set of effects and need to bring back effect
+ability}, called the \emph{ambient effect context}~\cite{tang2025modal,
+  tang2026modal}. Each typing judgement happens in such a context that records
+the effects the computation can perform. Modalities modify effect contexts.
+
+To ensure effect safety, operations can only yield values whose meaning is
+independent from the ambient effect context, which is not the case of arrow
+types, as they may use any effect in the context. Yielding a function is only
+possible by first boxing it in an \emph{absolute} modality that fixes the set of
+effects it can perform. However, to be able to compose cooperative concurrency
+with any effect, we cannot fix a set of effects and need to bring back effect
 variables~\cite[Section~2.10]{tang2025modal}.
 \begin{lstlisting}[style=metl]
   eff co (e : Effect)
@@ -260,24 +264,23 @@ modality to the continuation, bringing extra burden compared to Koka.
 
 \subsection{Effekt}
 Effekt takes another path to avoid cluttering type signatures with effect
-variables~\cite{effekt2020, effekt2022}. It uses capabilities to track effects,
-which gives cleaner type signatures. This approach relies on functions being
-second-class citizens in the language.
+variables: it uses capabilities to track effects~\cite{effekt2020,
+  effekt2022}. This approach relies on functions being second-class citizens in
+the language.
 
-This particularity offers two ways to define the cooperative concurrency
-effect. On the one hand, the \textsf{fork} operation can take a thunk as a
-first-class boxed function.
+This particularity offers two ways to define the cooperative concurrency effect,
+none of which uses a queue effect. On the one hand, the \textsf{fork} operation
+can take a thunk as a first-class boxed function.
 \begin{lstlisting}[style=effekt]
   interface Co[A, B] {
     def yield(): Unit
     def fork(p: Process[A, B]): Unit }
 
   type Proc[A, B] =
-    ({ cap: A => B } => (() => Unit / Co[A, B] at {cap}))
-      at {}
+    ({c: A => B} => (() => Unit / Co[A, B] at {c})) at {}
 \end{lstlisting}
 To perform any effect other than concurrency, processes have to use the argument
-\texttt{\small cap}.
+\texttt{\small c}.
 
 On the other hand, operations can take as input second-class \emph{blocks}.
 \begin{lstlisting}[style = effekt]
@@ -296,8 +299,6 @@ from the continuation's argument. To continue the parent computation only once,
   def fork { p: => Unit / Co }: Unit / Co =
     do forkOp { p(); do abort() }
 \end{lstlisting}
-  
-None of the implementations above use an effect for the queue.
 \section{Higher-order effects in \textsc{Met}}
 %
 \wenhao{We may want to elaborate on how MET works and how the new
@@ -305,11 +306,12 @@ approach works, and perhaps save some space by cutting off some texts
 from Frank and Effekt sections.}
 %
 The unsatisfactory solution in \textsc{Metl} motivates the search for new ways
-to extend the core calculus to support polymorphic higher-order effects. We
-have implemented a promising approach: relax kind restrictions on operations’
+to extend the core calculus to support polymorphic higher-order effects. We have
+implemented a promising approach: relax kind restrictions on operations’
 operands, but restrict subeffecting in presence of non-absolute types. These
 conditions should ensure that a non-absolute value arrives to an effect context
-more permessive than the one it comes from.
+more permessive than the one it comes from. Appendix~\ref{theory} presents the
+essential rules.
 
 With these new rules, the declaration below is well-typed and models
 concurrency.
@@ -373,7 +375,7 @@ lexical requirements.
 \section{\textsc{Metl} with higher-order effects}
 \subsection{Implementation}
 \lstinputlisting[style=metl]{impl/metl-ho-eff.met}
-\subsection{Theory}
+\subsection{Theory}\label{theory}
 The syntax annotates each effect type with an \emph{accidental}: a flat
 signature $A\twoheadrightarrow^\flat B$ has operands of absolute types, and a
 sharp signature $A\twoheadrightarrow^\sharp B$ has no restriction. Effect
