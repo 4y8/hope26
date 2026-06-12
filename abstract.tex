@@ -337,7 +337,7 @@ Then, the scheduler has the following type.
 
 Because each arrow has an absolute modality, this signature is similar to the
 Koka one, and lose the advantages of modal effect
-types. Moreover, this implementation relies on a \emph{modality-parametrised
+types. Moreover, this implementation relies on a \emph{modality-parameterised
 handler}~\cite[Section~3.5]{tang2026modal} to give a type with an absolute
 modality to the continuation.
 
@@ -434,7 +434,7 @@ previous implementations, the signature of \textsf{fork} does not mention the
 \textsf{co} effect. In fact, the thunk will have the same ambient effect context
 as the computation that yielded it, which contains effect \textsf{co}. For the
 same reason, there is no need for a distinct type of processes, which are plain
-functions. The scheduler does not rely modality-paramterised handler and has the
+functions. The scheduler does not rely modality-parameterised handler and has the
 following type.
 \begin{lstlisting}[style=metl]
   [queue (unit -> unit)](<co>(unit -> unit) -> unit)
@@ -513,7 +513,7 @@ incompatible with the queue.
 Such a handler, would remove the need for the wrapper. 
 
 We have not managed to use a queue effect to store our thunks. To do so, we
-would need to store in a queue a thunk that captures the queue capabality
+would need to store in a queue a thunk that captures the queue capability
 itself. However, we could not implement such a queue while staying in Effekt's
 lexical requirements.
 \section{\textsc{Metl} with higher-order effects}
@@ -600,3 +600,9 @@ modalities.
 Handling flat operation works the same way as usual \textsc{Met}.
 \fi
 \end{document}
+
+% LocalWords:  bool boolean equational Koka Effekt modally enqueue
+% LocalWords:  dequeue Koka's positivity ctl proc koka qproc forall
+% LocalWords:  effectful expressivity Metl metl effekt forkOp DoFlat
+% LocalWords:  Effekt's pushFront Subeffecting subeffecting DoSharp
+% LocalWords:  HandleSharp
