@@ -154,6 +154,10 @@ pauses the current one.
 %
 There are two canonical forms of fork operation we might consider.
 
+\sam{We use a double-headed arrow for signatures here and then switch
+  to a fat arrow when we introduce \Met. We should use the same
+  notation in both places!}
+
 The first form of fork is a UNIX(-style) fork operation of type
 $\textsf{unit} \twoheadrightarrow
 \textsf{bool}$~\cite{hillerstrom2021thesis} (we denote operation
@@ -218,8 +222,8 @@ the argument type $(\textsf{unit} \to \textsf{unit})$ of \textsf{fork}
 would typically be annotated with the effects that the child process
 might perform.
 %
-As a result, we have to use effect variables if we want to
-parameterise over the effects that the child process might perform.
+As a result, we must use effect variables if we want to parameterise
+over the effects that the child process might perform.
 
 Modal effect types (\Met) provide an elegant way to avoid effect
 variables for higher-order functions, but still requires effect
@@ -253,7 +257,7 @@ perform~\cite{koka2014,scopedrows2005}.
 We use an effect variable \lstinline{e} for the fork operation as
 follows.%
 \footnote{
-Koka's positivity checker would require an \textsf{div} effect for
+Koka's positivity checker would require a \textsf{div} effect for
 most function arrows in this section; we omit them for brevity.
 }
 %
@@ -358,6 +362,20 @@ types. Moreover, this implementation relies on a
   handler}~\cite[Section~3.5]{tang2026modal} to give a type with an
 absolute modality to the continuation.
 
+\sam{There are two many definitions missing here for this to be
+  properly understood. What even is a modality? What is a
+  modality-parameterised handler? A citation to a paper isn't good
+  enough. At least a brief sentence to describe the intuition is
+  required.}
+
+\sam{In the next section some relative modalities appear out of thin
+  air. But relative modalities aren't described here or there. They
+  need to be.}
+
+\sam{Extended abstracts, just like papers, need to be pretty much
+  self-contained. Citations are good, but they cannot replace
+  explanations.}
+
 \subsection{Effekt}
 
 Effekt tracks effects as capabilities~\cite{effekt2020,
@@ -374,7 +392,7 @@ of \textsf{fork}, we have to box them and specify the capabilities
 they use explicitly.
 %
 In order to parameterise over the capabilities that the child process
-might use, we need to introduce an explicit capability variable, which
+might use, we must introduce an explicit capability variable, which
 is reminiscent of the effect variables in Koka and \textsc{Met}.
 
 %
@@ -394,6 +412,9 @@ is reminiscent of the effect variables in Koka and \textsc{Met}.
 
 \section{Higher-order fork in \textsc{Met}, modally}
 
+\sam{This section isn't really readable. Certainly an example would
+  help - as Wenhao says.}
+
 As we have seen, in order to implement a higher-order fork effect that
 allows the child process to perform any effect, we have to use effect
 variables either explicitly or implicitly in most of the existing
@@ -403,8 +424,8 @@ This is particularly unsatisfactory for \textsc{Met}, as \textsc{Met}
 is designed to avoid effect variables.
 
 We observe that the main challenge is that when calling a higher-order
-fork in \Met, we do not know what should be the effect context for the
-argument (the child process), which depends on the effect context of
+fork in \Met, we do not know what the effect context for the argument
+(the child process) should be, as it depends on the effect context of
 the handler of fork.
 %
 % Effect tracking of \textsc{Met} relies on tracking switches between
@@ -413,9 +434,9 @@ the handler of fork.
 % use it at the handler side, which enables switching between effect
 % contexts in an opaque way.
 %
-As a result, we have to fully specify which effects might be performed
-by the child process with an absolute modality as in
-Section~\ref{sec:met}, and consequently, we have to bring back effect
+As a result, we must fully specify which effects might be performed by
+the child process with an absolute modality as in
+Section~\ref{sec:met}, and consequently, we must bring back effect
 variables to be parameterised over the effects that the closure might
 perform.
 
@@ -425,10 +446,9 @@ Our key idea is to impose an ordering on effects in effect contexts so
 that this order reflects the order of their handlers in the evaluation
 context.
 %
-As a result, when we call a higher-order operation such as fork,
-the effects that would still be available when the child process is
-called are exactly those that are after the fork effect in the effect
-context.
+As a result, when we call a higher-order operation such as fork, the
+effects that would still be available when the child process is called
+are exactly those that follow the fork effect in the effect context.
 
 \wenhao{Would be helpful to give a concrete example here}
 
@@ -446,19 +466,32 @@ as follows.
   eff! co = fork : (unit -> unit) => unit
           | yield : unit => unit
 \end{lstlisting}
-The bang indicates that operations can yield and receive any value. Unlike in
-previous implementations, the signature of \textsf{fork} does not mention the
-\textsf{co} effect. In fact, the thunk will have the same ambient effect context
-as the computation that yielded it, which contains effect \textsf{co}. For the
-same reason, there is no need for a distinct type of processes, which are plain
-functions. The scheduler does not rely modality-parameterised handler and has the
-following type.
+The bang indicates that operations can yield and receive any value.
+%
+\sam{This description of bang is entirely opaque. Most readers will
+  have no idea what it is intended to mean.}
+%
+Unlike in previous implementations, the signature of \textsf{fork}
+does not mention the \textsf{co} effect. In fact, the thunk will have
+the same ambient effect context as the computation that yielded it,
+which contains effect \textsf{co}. For the same reason, there is no
+need for a distinct type of processes, which are plain functions. The
+scheduler does not rely on a modality-parameterised handler and has
+the following type.
 \begin{lstlisting}[style=metl]
   [queue (unit -> unit)](<co>(unit -> unit) -> unit)
 \end{lstlisting}
-Another difference with the implementations of Section~\ref{impl} is the absence
-of masking. The semantics wraps the operands of higher-order effects with the
-same masks as the yielding evaluation context. The first call to the
+Another difference with the implementations of Section~\ref{impl} is
+the absence of masking.
+%
+\sam{This is perplexing. We haven't said anything about
+  masking. Perhaps this is because of shipping code to the
+  appendix. In any case we must explain masking if we are to talk
+  about it. Ideally we'd try to avoid talking about it in the body of
+  the paper though.}
+%
+The semantics wraps the operands of higher-order effects with the same
+masks as the yielding evaluation context. The first call to the
 scheduler still masks the \textsf{queue} effect.
 \begin{lstlisting}[style=metl]
   val full_schedule : [](<co>(unit -> unit) -> unit)
@@ -466,8 +499,15 @@ scheduler still masks the \textsf{queue} effect.
     queue { schedule { mask<queue> (m!) } }
 \end{lstlisting}
 
-For now, we lack a proof of safety and an expressivity result relating this
-system with the one with effect variables.
+%% SL: This is true, but not particularly interesting
+%
+%% For now, we lack a proof of safety and an expressivity result relating this
+%% system with the one with effect variables.
+
+\sam{This is an extremely abrupt end. It would be good to give a bit
+  more detail on how this actually works. It would also be nice to
+  finish with some kind of convincing conclusion, takeaway message, or
+  exciting proposal for future work.}
 
 \wenhao{Would it make sense to modify the implementation to automatically
 wrap the argument when calling higher-order fork, instead of requiring
@@ -527,10 +567,10 @@ incompatible with the queue.
       queue.pushFront(box child);
       () }
 \end{lstlisting}
-Such a handler, would remove the need for the wrapper. 
+Such a handler, would remove the need for the wrapper.
 
 We have not managed to use a queue effect to store our thunks. To do so, we
-would need to store in a queue a thunk that captures the queue capability
+would must store in a queue a thunk that captures the queue capability
 itself. However, we could not implement such a queue while staying in Effekt's
 lexical requirements.
 \section{\textsc{Metl} with higher-order effects}
@@ -553,7 +593,7 @@ signatures.
   Extensions & $D$ & ::= & $\cdot\mid\ell,D$\\
   Effect Contexts & $E,F$ & ::= & $\cdot\mid\ell,E$\\
   Label Contexts & $\Sigma$ & ::= &
-  $\cdot\mid\ell:A\twoheadrightarrow^Y B,\Sigma$\\ 
+  $\cdot\mid\ell:A\twoheadrightarrow^Y B,\Sigma$\\
 \end{tabular}
 \end{center}
 The extension equivalence rules fix the position of sharp signatures. Effect
