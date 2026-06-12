@@ -79,6 +79,7 @@
   \begin{spacing}{0.9}\footnotesize\textbf{#2:} #3\end{spacing}}}}
 \newcommand{\wenhao}[1]{\todobox{blue}{Wenhao}{#1}}
 \newcommand{\aghilas}[1]{\todobox{red}{Aghilas}{#1}}
+\newcommand{\sam}[1]{\todobox{yellow}{Sam}{#1}}
 %% ... up to here
 
 \usepackage{mathpartir}
@@ -119,7 +120,7 @@
   combine computational effects, such as cooperative concurrency. To add
   handlers without compromising safety, one can use a static type-and-effect
   system. The implementation of cooperative concurrency with a higher-order fork
-  reveals limitations of such a system.
+  reveals limitations of such systems.
 
   We first illustrate these limitations by implementing cooperative concurrency
   in four existing languages. We then present a new language based on modal
@@ -131,7 +132,11 @@
 Effect handlers can express many control-flow constructs. One example is
 cooperative concurrency~\cite{structuredasync2017}, which can be modelled using
 an effect with two operations: \textsf{fork} creates a new task; \textsf{yield}
-pauses the current one. The languages we will consider here implement
+pauses the current one.
+%
+\sam{The following is not really true. Most real implementations of concurrency in these languages use a higher-order fork effect. What are we actually trying to say here?}
+%
+The languages we will consider here implement
 multitasking with a UNIX-style fork of type $\textsf{unit} \twoheadrightarrow
 \textsf{bool}$~\cite{hillerstrom2021thesis}. The continuation receives a boolean
 indicating whether it is the parent or child, like in the following piece of
