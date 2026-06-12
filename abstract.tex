@@ -119,22 +119,23 @@
   Effect handlers are a powerful programming construct allowing users
   to define and combine computational effects, such as cooperative
   concurrency.
-  %
+%
   Effect systems statically track the effects that a program can
   perform.
-  %
-  Traditional effect systems rely on effect variables to give modular
-  type signatures for higher-order functions, while recent work on
-  modal effect types (\Met) reduce the need of these effect variables
-  via modalities.
-  %
-  However, for a higher-order fork operation which takes a child
-  process as argument, in order to allow the child process to perform
-  arbitrary effects, \Met still requires effect variables.
-  %
-  We propose a simple solution that enables writing a higher-order
-  fork in \Met without effect variables meanwhile not restricting the
-  child process.
+%
+  Traditional effect systems rely on effect variables to provide
+  modular type signatures for higher-order functions. Recent work on
+  modal effect types (\Met) reduces, and often eliminates altogether,
+  the need for effect variables via modalities.
+%
+  Alas, the standard way to define a higher-order fork operation whose
+  child process is parametric in its effects is to extend \Met with
+  effect variables.
+%
+  We propose a small extension to \Met, based on introducing an
+  ordering on effects in effect contexts, that enables us to define a
+  higher-order fork operation whose child process is parametric in its
+  effects, without the need for any effect variables at all.
   %
   % We first illustrate these limitations by implementing cooperative concurrency
   % in four existing languages. We then present a new language based on modal
