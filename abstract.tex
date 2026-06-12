@@ -141,20 +141,21 @@ indicating whether it is the parent or child, like in the following piece of
   else
     print "child"
 \end{lstlisting}
-The approach above to multitasking relies on multi-shot continuations, but most
-existing languages that start supporting handlers only support
-single-shot continuations~\cite{ocamleffect2021, wasmeffect2023}.
+The approach above to multitasking relies on multi-shot continuations,
+but many important existing languages only support single-shot
+continuations~\cite{ocamleffect2021, wasmeffect2023}.
 
-One can still implement cooperative concurrency with effect handlers in OCaml
-using another approach, even though it only supports single-shot
-continuation~\cite{dolan2015effective, ocamleffect2021}. The fork operation has
-then this signature.
+By taking an alternative approach, one can in fact implement
+cooperative concurrency with single-shot
+continuations~\cite{dolan2015effective, ocamleffect2021}. In OCaml, an
+alternative fork operation can be given following signature.
 \begin{lstlisting}[style=ocaml]
   type _ Effect.t += Fork : (unit -> unit) -> unit t
 \end{lstlisting}
-This operation takes as input a thunk of the computation which the new task
-should run. The scheduler maintains a queue of thunks that it runs. As OCaml has
-no static effect system, the type signatures are straightforward.
+This operation takes as input a thunk of the computation which the new
+task should run. The scheduler maintains a queue of thunks that it
+runs. As OCaml has no static effect system, the type is
+straightforward.
 
 We present implementations of a scheduler for cooperative concurrency with
 higher-order fork in Koka, Frank, Effekt and \textsc{Metl}. Then, we introduce a
