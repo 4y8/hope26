@@ -210,25 +210,8 @@ Noticing that the trailing effect variable is often the same through a
 signature, the Frank language gives syntactic sugar to insert
 effect variables~\cite{frank2020}.
 
-We transcribe here the concurrency example given
-in~\cite[Section~6]{frank2020}. The corresponding effect has signature:
-\begin{lstlisting}[style=Frank]
-  interface Co = fork : {[Co]Unit} -> Unit
-               | yield : Unit
-\end{lstlisting}
-where \lstinline[style=Frank]!{[Co]Unit}! is the type of computations with
-effect \lstinline[style=Frank]{Co}. By defining the type
-\lstinline[style=Frank]{Proc} to be \lstinline[style=Frank]!proc {[Queue Proc]Unit}!,
-the scheduler has the following variable-free type.
-\begin{lstlisting}[style=Frank]
-  {<Co>Unit -> [Queue Proc]Unit}
-\end{lstlisting}
-%The type checker desugars this type to:
-%\begin{lstlisting}[style = Frank]
-%  {<Co e>Unit -> [Queue (Proc e), e]Unit}
-%\end{lstlisting}
-
-%But Frank's approach is unsatisfactory as it only relies on syntax.
+This allows implementing concurrency with a higher-order fork without any
+explicit effect variable~\cite[Section~6]{frank2020}.
 \subsection{\textsc{Met}}
 \label{sec:met}
 
