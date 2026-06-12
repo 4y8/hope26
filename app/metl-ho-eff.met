@@ -1,0 +1,28 @@
+type unit = Unit
+
+type option a = None | Some of a
+
+eff! co = fork : (unit -> unit) => unit
+        | yield : unit => unit
+
+eff! queue a = enqueue : a => unit
+             | dequeue : unit => option a
+
+val next : [queue {unit}](unit -> unit)
+let next () =
+  match do dequeue () with
+  | None -> ()
+  | Some (p) -> p!
+  end
+
+val schedule : [queue {unit}](<co>{unit} -> unit)
+let schedule m =
+  handle m! with
+  | return _ => next!
+  | yield _ k => do enqueue k; next!
+  | fork p k => do enqueue { schedule p }; k!
+  end
+
+val full_schedule : [](<co>{unit} -> unit)
+let full_schedule m =
+  queue { schedule { mask<queue> (m!) } }
