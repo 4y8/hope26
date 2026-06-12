@@ -225,13 +225,36 @@ The type checker desugars this type to:
 \end{lstlisting}
 
 But Frank's approach is unsatisfactory as it only relies on syntax.
-\subsection{\textsc{Metl}}
-Drawing on Multimodal Type Theory~\cite{mtt2020}, modal effect types use
-\emph{modalities} to give a robust version of Frank's idea of \emph{ambient
-ability}, called the \emph{ambient effect context}~\cite{tang2025modal,
-  tang2026modal}. Each typing judgement happens in such a context that records
-the effects the computation can perform. Modalities modify effect contexts.
+\subsection{\textsc{Met}}
 
+Modal effect types (\textsc{Met}) decouple effects from function types
+via modalities~\cite{tang2025modal, tang2026modal} and enable similar
+succinct type signatures as Frank's without relying on fragile
+syntactic sugar.
+%
+The central notion of \text{Met} is the \emph{ambient effect context},
+which consists of the effects that a term can use provided by the
+context.
+%  
+Typing judgements track the ambient effect context and modalities
+transform between different effect contexts.
+%
+As an example, a \lstinline{map} function with the following signature
+is allowed to take any effectful function as argument, as long as the
+call site provides the required effects.
+%
+\begin{lstlisting}[style=metl]
+  val map : forall a b. []((a -> b) -> list a -> list b)
+\end{lstlisting}
+%
+The modality \lstinline{[]} indicates that the definition of
+\lstinline{map} itself does not use any effect.
+%
+We refer to \cite{tang2025modal, tang2026modal} for a full
+introduction to \textsc{Met}.
+
+However, \textsc{Met} cannot get rid of every effect variable.
+%
 To ensure effect safety, operations can only yield values whose meaning is
 independent from the ambient effect context, which is not the case of arrow
 types, as they may use any effect in the context. Yielding a function is only
