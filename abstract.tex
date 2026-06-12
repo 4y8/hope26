@@ -171,7 +171,7 @@ All the implementations are available in appendix and
 \href{https://github.com/4y8/hope26}{online}.
 \subsection{Koka}
 Koka has a traditional type-and-effect system where each arrow type holds a
-scoped row of effects the function can
+scoped row of the effects the function can
 perform~\cite{koka2014,scopedrows2005}. The implementation relies on effect
 polymorphism to store and yield effectful functions while pleasing the type
 system.
@@ -181,15 +181,15 @@ system.
     ctl fork (p : () -> <co<e>,div|e> unit) : unit
 \end{lstlisting}
 Koka's positivity checker requires the \textsf{div} keyword before the
-declaration, and we propagate the \textsf{div} effect, which signals potential
-non-termination, through all the signatures. The recursive type of processes is
-also effect-polymorphic:
+declaration, and all signatures bear the \textsf{div} effect, which signals
+potential non-termination. The recursive type of processes is also
+effect-polymorphic:
 \begin{lstlisting}[style=koka]
   div type proc<e>
     Proc (p : () -> <queue<proc<e>>,div|e> unit)
 \end{lstlisting}
-With help from the alias \lstinline[style = koka]{qproc e = queue<proc<e>>}, we
-implement a scheduler with type:
+With the alias \lstinline[style = koka]{qproc e = queue<proc<e>>}, the
+scheduler has type:
 \begin{lstlisting}[style=koka]
   (() -> <co<e>, qproc<e>, div|e> unit) ->
     <qproc<e>,div|e> unit
@@ -267,8 +267,8 @@ variables: it uses capabilities to track effects~\cite{effekt2020,
 the language.
 
 This particularity offers two ways to define the cooperative concurrency effect,
-none of which uses a queue effect. On the one hand, the \textsf{fork} operation
-can take a thunk as a first-class boxed function.
+none of which uses a queue effect. On the one hand, fork can take a thunk as a
+first-class boxed function.
 \begin{lstlisting}[style=effekt]
   interface Co[A, B] {
     def yield(): Unit
@@ -280,7 +280,7 @@ can take a thunk as a first-class boxed function.
 To perform any effect other than concurrency, processes have to use the argument
 \texttt{\small c}.
 
-On the other hand, operations can take as input second-class \emph{blocks}.
+On the other hand, fork can take as input second-class \emph{blocks}.
 \begin{lstlisting}[style = effekt]
   interface Co {
     def yield(): Unit
@@ -292,7 +292,8 @@ function that takes \texttt{\small p} as input. The scheduler resumes the
 continuation twice: to enqueue \texttt{\small p} and to continue the
 computation, because the type checker does not allow enqueuing \texttt{\small p}
 from the continuation's argument. To continue the parent computation only once,
-\texttt{\small fork} wraps each fork with an \texttt{\small abort} operation.
+the \texttt{\small fork} function wraps each fork with an \texttt{\small abort}
+operation.
 \begin{lstlisting}[style = effekt]
   def fork { p: => Unit / Co }: Unit / Co =
     do forkOp { p(); do abort() }
