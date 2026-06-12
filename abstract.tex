@@ -215,52 +215,65 @@ and introduce a simple extension to \Met which allows us to write
 higher-order fork modally without effect variables.
 
 
-\section{Implementation in four languages}\label{impl}
-We will now overview implementations of a cooperative concurrency effect with a
-fork that takes a thunk as input. To demonstrate compositionality of the
-type-and-effect systems, schedulers will use when possible a parametric queue
-effect with two operations (enqueue and dequeue) to store
+\section{Higher-order fork in existing languages}\label{impl}
+
+In this section, we overview implementations of a cooperative
+concurrency effect with a higher-order fork in existing languages with
+effect handlers and effect systems.
+%
+Our implementations of schedulers will use when possible a parametric
+queue effect with two operations (enqueue and dequeue) to store
 thunks.
 %
 All the implementations are available in appendix and
 \href{https://github.com/4y8/hope26}{online}.
+
+
 \subsection{Koka}
 Koka has a traditional type-and-effect system where each arrow type holds a
 scoped row of the effects the function can
-perform~\cite{koka2014,scopedrows2005}. The implementation relies on effect
-polymorphism to store and yield effectful functions while pleasing the type
-system.
+perform~\cite{koka2014,scopedrows2005}.
+%
+We use an effect variable \lstinline{e} for the fork operation as
+follows.%
+\footnote{
+Koka's positivity checker would require an \textsf{div} effect for
+most function arrows in this section; we omit them for brevity.
+}
+%
 \begin{lstlisting}[style=koka]
   div effect co<e>
     ctl yield () : unit
-    ctl fork (p : () -> <co<e>, div|e> unit) : unit
+    ctl fork (p : () -> <co<e>|e> unit) : unit
 \end{lstlisting}
-Koka's positivity checker requires the \textsf{div} keyword before the
-declaration. All signatures bear the \textsf{div} effect, which signals
-potential non-termination. The recursive type of processes is also
+%
+%
+The recursive type of processes is also
 effect-polymorphic:
 \begin{lstlisting}[style=koka]
   div type proc<e>
-    Proc (p : () -> <queue<proc<e>>, div|e> unit)
+    Proc (p : () -> <queue<proc<e>>|e> unit)
 \end{lstlisting}
-With the alias \lstinline[style = koka]{qproc e = queue<proc<e>>}, the
+Let \lstinline[style = koka]{qproc e = queue<proc<e>>}, the
 scheduler has type:
-\begin{lstlisting}[style=koka]
-  (() -> <co<e>, qproc<e>, div|e> unit) ->
-    <qproc<e>, div|e> unit
-\end{lstlisting}
-which becomes 
 \begin{lstlisting}[style=koka]
   (() -> <co<e>, qproc<e>|e> unit) -> <qproc<e>|e> unit
 \end{lstlisting}
-if we remove the \textsf{div} effect.
+
+The effect variable \lstinline{e} appears many times, making the type
+signatures more cluttered.
+
 \subsection{Frank}
 Noticing that the trailing effect variable is often the same through a
-signature, the Frank language gives syntactic sugar to insert
-effect variables~\cite{frank2020}.
-
+signature, the Frank language omits effect variables by default and
+uses syntactic sugar to automatically insert them~\cite{frank2020}.
+%
 This allows implementing concurrency with a higher-order fork without any
 explicit effect variable~\cite[Section~6]{frank2020}.
+%
+However, effect variables still exist during type checking and may be
+leaked to users in error messages.
+
 \subsection{\textsc{Met}}
 \label{sec:met}
 
@@ -269,28 +282,34 @@ via modalities~\cite{tang2025modal, tang2026modal} and enable similar
 succinct type signatures as Frank's without relying on fragile
 syntactic sugar.
 %
-The central notion of \text{Met} is the \emph{ambient effect context},
-which consists of the effects that a term can use provided by the
-context.
-%  
-Typing judgements track the ambient effect context and modalities
-transform between different effect contexts.
+The central notion of \text{Met} is the \emph{effect context}, which
+consists of the effects that a term can use provided by the context.
 %
-As an example, a \lstinline{map} function with the following signature
-is allowed to take any effectful function as argument, as long as the
-call site provides the required effects.
+% Typing judgements track the ambient effect context.
+%
+For example, a \lstinline{map} function has the following type
+signature.
 %
 \begin{lstlisting}[style=metl]
   val map : forall a b. []((a -> b) -> list a -> list b)
 \end{lstlisting}
 %
-The modality \lstinline{[]} indicates that the definition of
-\lstinline{map} itself does not use any effect.
+The \lstinline{[]} is an absolute modality indicating that the
+effect context of the definition of \lstinline{map} is empty, since
+\lstinline{map} itself use no effect.
+%
+We can apply \lstinline{map} to any effectful function, as long as the
+effect context at the call site provides the required effects.
 %
 We refer to \cite{tang2025modal, tang2026modal} for a full
 introduction to \textsc{Met}.
 
-However, \textsc{Met} cannot get rid of every effect variable.
+\Met works very well for higher-order functions.
+%
+\citeauthor{tang2025modal} show that we can encode a large fragment
+of effect polymorphic programs in \Met without using effect variables.
+%
+However, this claim fails for higher-order effects.
 %
 To ensure effect safety, operations can only yield values whose meaning is
 independent from the ambient effect context, which is not the case of arrow
@@ -316,12 +335,13 @@ Then, the scheduler has the following type.
 \end{lstlisting}
 
 Because each arrow has an absolute modality, this signature is similar to the
-Koka one, and eliminates all the advantages of modal effect
+Koka one, and lose the advantages of modal effect
 types. Moreover, this implementation relies on a \emph{modality-parametrised
 handler}~\cite[Section~3.5]{tang2026modal} to give a type with an absolute
-modality to the continuation, bringing extra burden compared to Koka.
+modality to the continuation.
 
 \subsection{Effekt}
+
 Effekt takes another path to avoid cluttering type signatures with effect
 variables: it uses capabilities to track effects~\cite{effekt2020,
   effekt2022}. This approach relies on functions being second-class citizens in
