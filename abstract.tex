@@ -186,7 +186,7 @@ system.
 \begin{lstlisting}[style=koka]
   div effect co<e>
     ctl yield () : unit
-    ctl fork (p : () -> <co<e>,div|e> unit) : unit
+    ctl fork (p : () -> <co<e>, div|e> unit) : unit
 \end{lstlisting}
 Koka's positivity checker requires the \textsf{div} keyword before the
 declaration. All signatures bear the \textsf{div} effect, which signals
@@ -194,13 +194,13 @@ potential non-termination. The recursive type of processes is also
 effect-polymorphic:
 \begin{lstlisting}[style=koka]
   div type proc<e>
-    Proc (p : () -> <queue<proc<e>>,div|e> unit)
+    Proc (p : () -> <queue<proc<e>>, div|e> unit)
 \end{lstlisting}
 With the alias \lstinline[style = koka]{qproc e = queue<proc<e>>}, the
 scheduler has type:
 \begin{lstlisting}[style=koka]
   (() -> <co<e>, qproc<e>, div|e> unit) ->
-    <qproc<e>,div|e> unit
+    <qproc<e>, div|e> unit
 \end{lstlisting}
 which becomes 
 \begin{lstlisting}[style=koka]
@@ -297,8 +297,8 @@ variables: it uses capabilities to track effects~\cite{effekt2020,
 the language.
 
 This particularity offers two ways to define the cooperative concurrency effect,
-none of which uses a queue effect. On the one hand, fork can take a thunk as a
-first-class boxed function.
+none of which uses a queue effect. On the one hand, fork can take a first-class
+boxed function.
 \begin{lstlisting}[style=effekt]
   interface Co[A, B] {
     def yield(): Unit
