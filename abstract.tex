@@ -295,12 +295,12 @@ leak into error messages displayed to the programmer.
 \label{sec:met}
 
 Modal effect types (\textsc{Met}) decouple effects from function types
-via modalities~\cite{tang2025modal, tang2026modal} and enable similar
-succinct type signatures as Frank's without relying on fragile
+via modalities~\cite{tang2025modal, tang2026modal} and enable type
+signatures similarly succinct to Frank's without relying on fragile
 syntactic sugar.
 %
 The central notion of \text{Met} is the \emph{effect context}, which
-consists of the effects that a term can use provided by the context.
+determines the effects that a term can use.
 %
 % Typing judgements track the ambient effect context.
 %
@@ -311,9 +311,9 @@ signature.
   val map : forall a b. []((a -> b) -> list a -> list b)
 \end{lstlisting}
 %
-The \lstinline{[]} is an absolute modality indicating that the
-effect context of the definition of \lstinline{map} is empty, since
-\lstinline{map} itself use no effect.
+The \lstinline{[]} is an absolute modality indicating that the effect
+context of the definition of \lstinline{map} is empty, since
+\lstinline{map} itself uses no effect.
 %
 We can apply \lstinline{map} to any effectful function, as long as the
 effect context at the call site provides the required effects.
@@ -321,19 +321,19 @@ effect context at the call site provides the required effects.
 We refer to \cite{tang2025modal, tang2026modal} for a full
 introduction to \textsc{Met}.
 
-\Met works very well for higher-order functions.
+\Met enables a large fragment of effect polymorphic programs in \Met
+to be written without using effect variables~\cite{tang2025modal}.
 %
-\citeauthor{tang2025modal} show that we can encode a large fragment
-of effect polymorphic programs in \Met without using effect variables.
+However, this fragment does not include programs that use higher-order
+effects.
 %
-However, this claim fails for higher-order effects.
-%
-To ensure effect safety, operations can only yield values whose meaning is
-independent from the ambient effect context, which is not the case of arrow
-types, as they may use any effect in the context. Yielding a function is only
-possible by first boxing it in an \emph{absolute} modality that fixes the set of
-effects it can perform. To be able to compose cooperative concurrency with any
-effect, we cannot fix a set of effects and need to bring back effect
+To ensure effect safety, operations can only yield values whose
+meaning is independent of the ambient effect context, which is not the
+case for arrow types, as they may use any effect in the
+context. Yielding a function is only possible by first boxing it in an
+\emph{absolute} modality that fixes the set of effects it can
+perform. To be able to compose cooperative concurrency with any
+effect, we cannot fix a set of effects and must bring back effect
 variables~\cite[Section~2.10]{tang2025modal}.
 \begin{lstlisting}[style=metl]
   eff co (e : Effect)
@@ -351,11 +351,12 @@ Then, the scheduler has the following type.
     ([co e, queue (proc e), e](unit -> unit) -> unit)
 \end{lstlisting}
 
-Because each arrow has an absolute modality, this signature is similar to the
-Koka one, and lose the advantages of modal effect
-types. Moreover, this implementation relies on a \emph{modality-parameterised
-handler}~\cite[Section~3.5]{tang2026modal} to give a type with an absolute
-modality to the continuation.
+Because each arrow has an absolute modality, this signature is similar
+to the Koka one, and loses the advantages of modal effect
+types. Moreover, this implementation relies on a
+\emph{modality-parameterised
+  handler}~\cite[Section~3.5]{tang2026modal} to give a type with an
+absolute modality to the continuation.
 
 \subsection{Effekt}
 
