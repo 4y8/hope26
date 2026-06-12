@@ -137,13 +137,16 @@ pauses the current one.
 \sam{The following is not really true. Most real implementations of concurrency in these languages use a higher-order fork effect. What are we actually trying to say here?}
 \aghilas{I wanted to say that we can easily implement the unix style fork in all of these languages}
 %
-The languages we will consider here can implement multitasking with a UNIX-style
-fork of type $\textsf{unit} \twoheadrightarrow
-\textsf{bool}$~\cite{hillerstrom2021thesis} and straightforward type
-signatures. The continuation receives a boolean indicating whether it is the
-parent or child, like in the following piece of \textsc{Metl} code.
+The languages we will consider here can easily implement multitasking with a
+UNIX-style fork of type $\textsf{unit} \twoheadrightarrow
+\textsf{bool}$~\cite{hillerstrom2021thesis}. The continuation receives a boolean
+indicating whether it is the parent or child, like in the following piece of
+\textsc{Metl} code.
 \begin{lstlisting}[style=metl]
-  if do fork () then print "parent" else print "child"
+  if do fork () then
+    print "parent"
+  else
+    print "child"
 \end{lstlisting}
 The approach above to multitasking relies on multi-shot continuations,
 but many important existing languages only support single-shot
@@ -171,7 +174,7 @@ fork that takes a thunk as input. To demonstrate compositionality of the
 type-and-effect systems, schedulers will use when possible a parametric queue
 effect with two operations (enqueue and dequeue) to store
 thunks.
-
+%
 All the implementations are available in appendix and
 \href{https://github.com/4y8/hope26}{online}.
 \subsection{Koka}
@@ -227,7 +230,7 @@ the scheduler has the following variable-free type.
 %  {<Co e>Unit -> [Queue (Proc e), e]Unit}
 %\end{lstlisting}
 
-But Frank's approach is unsatisfactory as it only relies on syntax.
+%But Frank's approach is unsatisfactory as it only relies on syntax.
 \subsection{\textsc{Met}}
 
 Modal effect types (\textsc{Met}) decouple effects from function types
@@ -306,7 +309,7 @@ first-class boxed function.
 \end{lstlisting}
 To perform any effect other than concurrency, processes have to use the argument
 \texttt{\small c}.
-
+%
 On the other hand, fork can take as input second-class \emph{blocks}.
 \begin{lstlisting}[style = effekt]
   interface Co {
@@ -317,8 +320,9 @@ On the other hand, fork can take as input second-class \emph{blocks}.
 When handling \texttt{\small forkOp}, the continuation expects as argument a
 function that takes \texttt{\small p} as input. The scheduler resumes the
 continuation twice: to enqueue \texttt{\small p} and to continue the
-computation, because the type checker does not allow enqueuing \texttt{\small p}
-from the continuation's argument. To continue the parent computation only once,
+computation.
+% The type checker does not allow enqueuing \texttt{\small p} from the continuation's argument
+To continue the parent computation only once,
 the \texttt{\small fork} function wraps each fork with an \texttt{\small abort}
 operation.
 \begin{lstlisting}[style = effekt]
