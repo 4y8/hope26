@@ -135,17 +135,15 @@ an effect with two operations: \textsf{fork} creates a new task; \textsf{yield}
 pauses the current one.
 %
 \sam{The following is not really true. Most real implementations of concurrency in these languages use a higher-order fork effect. What are we actually trying to say here?}
+\aghilas{I wanted to say that we can easily implement the unix style fork in all of these languages}
 %
-The languages we will consider here implement
-multitasking with a UNIX-style fork of type $\textsf{unit} \twoheadrightarrow
-\textsf{bool}$~\cite{hillerstrom2021thesis}. The continuation receives a boolean
-indicating whether it is the parent or child, like in the following piece of
-\textsc{Metl} code.
+The languages we will consider here can implement multitasking with a UNIX-style
+fork of type $\textsf{unit} \twoheadrightarrow
+\textsf{bool}$~\cite{hillerstrom2021thesis} and straightforward type
+signatures. The continuation receives a boolean indicating whether it is the
+parent or child, like in the following piece of \textsc{Metl} code.
 \begin{lstlisting}[style=metl]
-  if do fork () then
-    print "parent"
-  else
-    print "child"
+  if do fork () then print "parent" else print "child"
 \end{lstlisting}
 The approach above to multitasking relies on multi-shot continuations,
 but many important existing languages only support single-shot
