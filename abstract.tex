@@ -309,27 +309,6 @@ boxed function.
 To perform any effect other than concurrency, processes have to use the argument
 \texttt{\small c}.
 %
-On the other hand, fork can take as input second-class \emph{blocks}.
-\begin{lstlisting}[style = effekt]
-  interface Co {
-    def yield(): Unit
-    def abort(): Nothing
-    def forkOp{ p: () => Unit }: Unit }
-\end{lstlisting}
-When handling \texttt{\small forkOp}, the continuation expects as argument a
-function that takes \texttt{\small p} as input. The scheduler resumes the
-continuation twice: to enqueue \texttt{\small p} and to continue the
-computation.
-% The type checker does not allow enqueuing \texttt{\small p} from the continuation's argument
-To continue the parent computation only once,
-the \texttt{\small fork} function wraps each fork with an \texttt{\small abort}
-operation.
-\begin{lstlisting}[style = effekt]
-  def fork { p: => Unit / Co }: Unit / Co =
-    do forkOp { p(); do abort() }
-\end{lstlisting}
-
-\wenhao{TODO: Move bidirectional effects to the appendix.}
 
 \section{Higher-order effects in \textsc{Met}}
 
@@ -408,17 +387,47 @@ wrap the argument, instead of requiring the effect to be the first?}
 
 \printbibliography
 \appendix
+
 \section{Koka}
 \lstinputlisting[style=koka]{app/koka.kk}
 \section{Frank}
 \lstinputlisting[style=frank]{app/frank.fk}
 \section{\textsc{Metl} with effect variables}
 \lstinputlisting[style=metl]{app/metl-eff-var.met}
+
 \section{Effekt}
 \subsection{Boxed functions}
 \lstinputlisting[style = effekt]{app/effekt-boxes.effekt}
 \subsection{Bidirectional effects}
+Effekt supports bidirectional effects which can be used to implement
+some form of higher-order effects.
+%
+With bidirectional effects, fork can take as input second-class
+\emph{blocks}.
+%
+\begin{lstlisting}[style = effekt]
+  interface Co {
+    def yield(): Unit
+    def abort(): Nothing
+    def forkOp{ p: () => Unit }: Unit }
+\end{lstlisting}
+When handling \texttt{\small forkOp}, the continuation expects as argument a
+function that takes \texttt{\small p} as input. The scheduler resumes the
+continuation twice: to enqueue \texttt{\small p} and to continue the
+computation.
+% The type checker does not allow enqueuing \texttt{\small p} from the continuation's argument
+To continue the parent computation only once,
+the \texttt{\small fork} function wraps each fork with an \texttt{\small abort}
+operation.
+\begin{lstlisting}[style = effekt]
+  def fork { p: => Unit / Co }: Unit / Co =
+    do forkOp { p(); do abort() }
+\end{lstlisting}
+
+The full implementation is as follows.
+
 \lstinputlisting[style = effekt]{app/effekt-bieff-with-abort.effekt}
+
 \subsection{Additional comments}
 The version with bidirectional effects resumes the continuation twice. Effekt's
 type system reject the following handler for \texttt{\small forkOp}, which would
