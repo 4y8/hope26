@@ -234,15 +234,14 @@ higher-order fork using modal effect types without effect variables.
 
 \section{Higher-order fork in existing languages}\label{impl}
 
-In this section, we overview implementations of a cooperative
-concurrency effect with a higher-order fork in existing languages with
-effect handlers and effect systems.
+In this section, we outline implementations of a cooperative
+concurrency effect incorporating a higher-order fork operation in
+existing languages with effect handlers and effect systems.
 %
-Our implementations of schedulers will use when possible a parametric
-queue effect with two operations (enqueue and dequeue) to store
-thunks.
+Our implementations of schedulers use a parametric queue effect with
+two operations (enqueue and dequeue) to store thunks.
 %
-All the implementations are available in appendix and
+All the implementations are available in the appendix and
 \href{https://github.com/4y8/hope26}{online}.
 
 
@@ -277,19 +276,20 @@ scheduler has type:
   (() -> <co<e>, qproc<e>|e> unit) -> <qproc<e>|e> unit
 \end{lstlisting}
 
-The effect variable \lstinline{e} appears many times, making the type
-signatures more cluttered.
+The effect variable \lstinline{e} appears several times.
 
 \subsection{Frank}
-Noticing that the trailing effect variable is often the same through a
-signature, the Frank language omits effect variables by default and
-uses syntactic sugar to automatically insert them~\cite{frank2020}.
+Embodying the observation that effect variables are almost always the
+same throughout a signature, the Frank programming language omits
+effect variables by default and uses syntactic sugar to automatically
+insert them~\cite{frank2020}.
 %
-This allows implementing concurrency with a higher-order fork without any
-explicit effect variable~\cite[Section~6]{frank2020}.
+This allows implementing concurrency with a higher-order fork
+operation without any explicit effect
+variables~\cite[Section~6]{frank2020}.
 %
-However, effect variables still exist during type checking and may be
-leaked to users in error messages.
+However, effect variables still exist during type checking and may
+leak into error messages displayed to the programmer.
 
 \subsection{\textsc{Met}}
 \label{sec:met}
