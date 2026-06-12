@@ -305,7 +305,7 @@ approach works, and perhaps save some space by cutting off some texts
 from Frank and Effekt sections.}
 %
 The unsatisfactory solution in \textsc{Metl} motivates the search for new ways
-to extend the core calculus to support polymorphic higher-order effects. We have
+to extend the core calculus with support for polymorphic higher-order effects. We have
 implemented a promising approach: relax kind restrictions on operations’
 operands, but restrict subeffecting in presence of non-absolute types. These
 conditions should ensure that a non-absolute value arrives to an effect context
@@ -322,7 +322,7 @@ The bang indicates that the effect can yield and receive any value. Unlike in
 previous implementations, the signature of \textsf{fork} does not mention the
 \textsf{co} effect. In fact, the thunk will have the same ambient effect context
 as the computation that yielded it, which contains effect \textsf{co}. For the
-same reason, there is no need for a distinct type of processes and can use
+same reason, there is no need for a distinct type of processes, which are plain
 functions. The scheduler does not rely modality-paramterised handler and has the
 following type.
 \begin{lstlisting}[style=metl]
@@ -330,7 +330,7 @@ following type.
 \end{lstlisting}
 Another difference with the implementations of Section~\ref{impl} is the absence
 of masking. The semantics wraps the operands of higher-order effects with the
-same masks as the yielding evaluation context. Therefore, the first call to the
+same masks as the yielding evaluation context. The first call to the
 scheduler still masks the \textsf{queue} effect.
 \begin{lstlisting}[style=metl]
   val full_schedule : [](<co>(unit -> unit) -> unit)
