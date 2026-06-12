@@ -78,7 +78,7 @@
 \newcommand{\todobox}[3]{{\todo[color=#1!20,bordercolor=#1!80]{%
   \begin{spacing}{0.9}\footnotesize\textbf{#2:} #3\end{spacing}}}}
 \newcommand{\wenhao}[1]{\todobox{blue}{Wenhao}{#1}}
-\newcommand{\aghilas}[1]{\todobox{blue}{Aghilas}{#1}}
+\newcommand{\aghilas}[1]{\todobox{red}{Aghilas}{#1}}
 %% ... up to here
 
 \usepackage{mathpartir}
@@ -124,16 +124,14 @@
   in four existing languages. We then present a new language based on modal
   effect types, which we use to implement cooperative concurrency with a
   higher-order fork.
-  
 \end{abstract}
 \maketitle
 \section{Introduction}
 Effect handlers can express many control-flow constructs. One example is
 cooperative concurrency~\cite{structuredasync2017}, which can be modelled using
-an effect with two operations \textsf{fork} and \textsf{yield} that,
-respectively, create a new task and pause the current one. The languages we will
-consider here implement multitasking with a UNIX-style fork of type
-$\textsf{unit} \twoheadrightarrow
+an effect with two operations: \textsf{fork} creates a new task; \textsf{yield}
+pauses the current one. The languages we will consider here implement
+multitasking with a UNIX-style fork of type $\textsf{unit} \twoheadrightarrow
 \textsf{bool}$~\cite{hillerstrom2021thesis}. The continuation receives a boolean
 indicating whether it is the parent or child, like in the following piece of
 \textsc{Metl} code.
@@ -144,7 +142,7 @@ indicating whether it is the parent or child, like in the following piece of
     print "child"
 \end{lstlisting}
 The approach above to multitasking relies on multi-shot continuations, but most
-existing languages that start supporting effect handlers only support
+existing languages that start supporting handlers only support
 single-shot continuations~\cite{ocamleffect2021, wasmeffect2023}.
 
 One can still implement cooperative concurrency with effect handlers in OCaml
@@ -160,13 +158,13 @@ no static effect system, the type signatures are straightforward.
 
 We present implementations of a scheduler for cooperative concurrency with
 higher-order fork in Koka, Frank, Effekt and \textsc{Metl}. Then, we introduce a
-new way to express higher-order effects with modal effect types and use a
-language following it to implement such a scheduler.
+new approach for combining higher-order effects and modal effect types and use a
+language following this approach to implement such a scheduler.
 \section{Implementation in four languages}\label{impl}
 We will now overview implementations of a cooperative concurrency effect with a
 fork that takes a thunk as input. To demonstrate compositionality of the
 type-and-effect systems, schedulers will use when possible a parametric queue
-effect with two operations (\textsf{enqueue} and \textsf{dequeue}) to store
+effect with two operations (enqueue and dequeue) to store
 thunks.
 
 All the implementations are available in appendix and
@@ -219,8 +217,8 @@ the scheduler has the following variable-free type.
 \begin{lstlisting}[style=Frank]
   {<Co>Unit -> [Queue Proc]Unit}
 \end{lstlisting}
-\aghilas{should we remove that}
 The type checker desugars this type to:
+\aghilas{should we remove that?}
 \begin{lstlisting}[style = Frank]
   {<Co e>Unit -> [Queue (Proc e), e]Unit}
 \end{lstlisting}
@@ -417,7 +415,7 @@ Subeffecting of extensions allows moving sharp labels backward.
 For subeffecting, effect contexts follow the same rules as extensions with the
 addition of $\cdot\leqslant E$.
 
-The rules for $\keyw{do}$ ensure that a sharp operation is unavailable if not
+The rules for $\keyw{do}$ ensure that a sharp operation is available only if
 first of the ambient effect context.
 \begin{mathpar}
   \inferrule[\textsc{T-DoFlat}]
