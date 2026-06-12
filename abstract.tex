@@ -152,24 +152,26 @@ pauses the current one.
 % \sam{The following is not really true. Most real implementations of concurrency in these languages use a higher-order fork effect. What are we actually trying to say here?}
 % \aghilas{I wanted to say that we can easily implement the unix style fork in all of these languages}
 %
-There are two different styles for the \textsf{fork} operation.
+There are two canonical forms of fork operation we might consider.
+
+The first form of fork is a UNIX(-style) fork operation of type
+$\textsf{unit} \twoheadrightarrow
+\textsf{bool}$~\cite{hillerstrom2021thesis} (we denote operation
+signatures with a double-headed arrow).
 %
-One is the UNIX-style fork of type $\textsf{unit} \twoheadrightarrow
-\textsf{bool}$~\cite{hillerstrom2021thesis}.
-%
-The continuation receives a boolean indicating whether it is the
-parent or child in the following code.
+The continuation receives a boolean for distinguishing the parent and
+child in the following code.
 \begin{lstlisting}[style=metl]
   if do fork () then print "parent"
                 else print "child"
 \end{lstlisting}
 %
-This approach relies on multi-shot continuations, which is not
-suitable for industrial languages that only support single-shot
+UNIX fork relies on multi-shot continuations, so is unsuitable for
+programming languages that support only single-shot
 continuations~\cite{ocamleffect2021, wasmeffect2023}.
 
-The other style is the higher-order fork of type $(\textsf{unit} \to
-\textsf{unit}) \twoheadrightarrow
+The second form of fork is a higher-order fork operation of type
+$(\textsf{unit} \to \textsf{unit}) \twoheadrightarrow
 \textsf{unit}$~\cite{dolan2015effective, ocamleffect2021}.
 %
 % By taking an alternative approach, one can in fact implement
@@ -183,37 +185,51 @@ The other style is the higher-order fork of type $(\textsf{unit} \to
 % task should run. The scheduler maintains a queue of thunks that it
 % runs. As OCaml has no static effect system, the type is
 % straightforward.
-This operation takes a thunk of the computation, which is a function
-of type $\textsf{unit}\to\textsf{unit}$, for the child process.
+This operation takes a thunk for the child process, which is a
+function of type $\textsf{unit}\to\textsf{unit}$.
 %
-The same program as above is written as follows with higher-order fork.
+The program corresponding to our previous example is written as
+follows with higher-order fork.
 \begin{lstlisting}[style=metl]
   do fork (fun () -> print "child");
   print "parent"
 \end{lstlisting}
 
-Higher-order fork is more suitable for languages with single-shot
-continuations and enjoys more interesting equational
-theories~\cite{KammarLLMS26}, meanwhile presenting extra challenges
-for effect systems.
+Higher-order fork can be implemented using single-shot
+continuations.
 %
-Traditional effect systems typically annotate function arrows with
-effects, so the argument type $(\textsf{unit} \to
-\textsf{unit})$ of \textsf{fork} has to be annotated with the effects
-that the child process might perform.
+%% SL: This is more-or-less true, but this observation seems to
+%% intricate to include right here.
+%
+%% However, whereas (a slight generalisation of) UNIX fork
+%% can be characterised by a (parameterised) algebraic theory,
+%% higher-order fork is not even algebraic. Nonetheless, it is still a
+%% practically useful operation.
+%
+However, higher-order fork is somewhat complicated by the need to keep
+track of the effects in its parameter.
+%
+%% However, being higher-order,  equational
+%% theories~\cite{KammarLLMS26}, meanwhile presenting extra challenges
+%% for effect systems.
+%
+Traditional effect systems annotate function arrows with effects, so
+the argument type $(\textsf{unit} \to \textsf{unit})$ of \textsf{fork}
+would typically be annotated with the effects that the child process
+might perform.
 %
 As a result, we have to use effect variables if we want to
 parameterise over the effects that the child process might perform.
 
 Modal effect types (\Met) provide an elegant way to avoid effect
 variables for higher-order functions, but still requires effect
-variables for higher-order effects such as the higher-order fork.
+variables for higher-order operations such as higher-order fork.
 %
-In the remaining of this extended abstract, we first present
+In the rest of this extended abstract, we briefly describe
 implementations of higher-order fork in existing effect systems (Koka,
 Frank, Effekt, and \Met), demonstrate why effect variables are needed,
-and introduce a simple extension to \Met which allows us to write
-higher-order fork modally without effect variables.
+and introduce a simple extension to \Met which enables us to write
+higher-order fork using modal effect types without effect variables.
 
 
 \section{Higher-order fork in existing languages}\label{impl}
