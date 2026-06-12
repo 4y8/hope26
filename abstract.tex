@@ -1,4 +1,4 @@
-\documentclass[sigplan, nonacm = true, natbib = false, review = true]{acmart}
+\documentclass[sigplan, nonacm, natbib = false, review, screen]{acmart}
 
 \usepackage{listings}
 
@@ -88,6 +88,7 @@
 \settopmatter{authorsperrow=3}
 
 \author{Aghilas Y. Boussaa}
+\orcid{0009-0005-5954-1711}
 \email{aghilas.boussaa@ens.fr}
 \affiliation{%
   \institution{École normale supérieure -- PSL}
@@ -172,7 +173,7 @@ All the implementations are available in appendix and
 \href{https://github.com/4y8/hope26}{online}.
 \subsection{Koka}
 Koka has a traditional type-and-effect system where each arrow type holds a
-scoped row of effects the function can
+scoped row of the effects the function can
 perform~\cite{koka2014,scopedrows2005}. The implementation relies on effect
 polymorphism to store and yield effectful functions while pleasing the type
 system.
@@ -182,15 +183,15 @@ system.
     ctl fork (p : () -> <co<e>,div|e> unit) : unit
 \end{lstlisting}
 Koka's positivity checker requires the \textsf{div} keyword before the
-declaration, and we propagate the \textsf{div} effect, which signals potential
-non-termination, through all the signatures. The recursive type of processes is
-also effect-polymorphic:
+declaration, and all signatures bear the \textsf{div} effect, which signals
+potential non-termination. The recursive type of processes is also
+effect-polymorphic:
 \begin{lstlisting}[style=koka]
   div type proc<e>
     Proc (p : () -> <queue<proc<e>>,div|e> unit)
 \end{lstlisting}
-With help from the alias \lstinline[style = koka]{qproc e = queue<proc<e>>}, we
-implement a scheduler with type:
+With the alias \lstinline[style = koka]{qproc e = queue<proc<e>>}, the
+scheduler has type:
 \begin{lstlisting}[style=koka]
   (() -> <co<e>, qproc<e>, div|e> unit) ->
     <qproc<e>,div|e> unit
@@ -225,13 +226,36 @@ The type checker desugars this type to:
 \end{lstlisting}
 
 But Frank's approach is unsatisfactory as it only relies on syntax.
-\subsection{\textsc{Metl}}
-Drawing on Multimodal Type Theory~\cite{mtt2020}, modal effect types use
-\emph{modalities} to give a robust version of Frank's idea of \emph{ambient
-ability}, called the \emph{ambient effect context}~\cite{tang2025modal,
-  tang2026modal}. Each typing judgement happens in such a context that records
-the effects the computation can perform. Modalities modify effect contexts.
+\subsection{\textsc{Met}}
 
+Modal effect types (\textsc{Met}) decouple effects from function types
+via modalities~\cite{tang2025modal, tang2026modal} and enable similar
+succinct type signatures as Frank's without relying on fragile
+syntactic sugar.
+%
+The central notion of \text{Met} is the \emph{ambient effect context},
+which consists of the effects that a term can use provided by the
+context.
+%  
+Typing judgements track the ambient effect context and modalities
+transform between different effect contexts.
+%
+As an example, a \lstinline{map} function with the following signature
+is allowed to take any effectful function as argument, as long as the
+call site provides the required effects.
+%
+\begin{lstlisting}[style=metl]
+  val map : forall a b. []((a -> b) -> list a -> list b)
+\end{lstlisting}
+%
+The modality \lstinline{[]} indicates that the definition of
+\lstinline{map} itself does not use any effect.
+%
+We refer to \cite{tang2025modal, tang2026modal} for a full
+introduction to \textsc{Met}.
+
+However, \textsc{Met} cannot get rid of every effect variable.
+%
 To ensure effect safety, operations can only yield values whose meaning is
 independent from the ambient effect context, which is not the case of arrow
 types, as they may use any effect in the context. Yielding a function is only
@@ -268,8 +292,8 @@ variables: it uses capabilities to track effects~\cite{effekt2020,
 the language.
 
 This particularity offers two ways to define the cooperative concurrency effect,
-none of which uses a queue effect. On the one hand, the \textsf{fork} operation
-can take a thunk as a first-class boxed function.
+none of which uses a queue effect. On the one hand, fork can take a thunk as a
+first-class boxed function.
 \begin{lstlisting}[style=effekt]
   interface Co[A, B] {
     def yield(): Unit
@@ -281,7 +305,7 @@ can take a thunk as a first-class boxed function.
 To perform any effect other than concurrency, processes have to use the argument
 \texttt{\small c}.
 
-On the other hand, operations can take as input second-class \emph{blocks}.
+On the other hand, fork can take as input second-class \emph{blocks}.
 \begin{lstlisting}[style = effekt]
   interface Co {
     def yield(): Unit
@@ -293,7 +317,8 @@ function that takes \texttt{\small p} as input. The scheduler resumes the
 continuation twice: to enqueue \texttt{\small p} and to continue the
 computation, because the type checker does not allow enqueuing \texttt{\small p}
 from the continuation's argument. To continue the parent computation only once,
-\texttt{\small fork} wraps each fork with an \texttt{\small abort} operation.
+the \texttt{\small fork} function wraps each fork with an \texttt{\small abort}
+operation.
 \begin{lstlisting}[style = effekt]
   def fork { p: => Unit / Co }: Unit / Co =
     do forkOp { p(); do abort() }
@@ -305,7 +330,7 @@ approach works, and perhaps save some space by cutting off some texts
 from Frank and Effekt sections.}
 %
 The unsatisfactory solution in \textsc{Metl} motivates the search for new ways
-to extend the core calculus to support polymorphic higher-order effects. We have
+to extend the core calculus with support for polymorphic higher-order effects. We have
 implemented a promising approach: relax kind restrictions on operations’
 operands, but restrict subeffecting in presence of non-absolute types. These
 conditions should ensure that a non-absolute value arrives to an effect context
@@ -322,7 +347,7 @@ The bang indicates that the effect can yield and receive any value. Unlike in
 previous implementations, the signature of \textsf{fork} does not mention the
 \textsf{co} effect. In fact, the thunk will have the same ambient effect context
 as the computation that yielded it, which contains effect \textsf{co}. For the
-same reason, there is no need for a distinct type of processes and can use
+same reason, there is no need for a distinct type of processes, which are plain
 functions. The scheduler does not rely modality-paramterised handler and has the
 following type.
 \begin{lstlisting}[style=metl]
@@ -330,7 +355,7 @@ following type.
 \end{lstlisting}
 Another difference with the implementations of Section~\ref{impl} is the absence
 of masking. The semantics wraps the operands of higher-order effects with the
-same masks as the yielding evaluation context. Therefore, the first call to the
+same masks as the yielding evaluation context. The first call to the
 scheduler still masks the \textsf{queue} effect.
 \begin{lstlisting}[style=metl]
   val full_schedule : [](<co>(unit -> unit) -> unit)
