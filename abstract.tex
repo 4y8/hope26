@@ -63,6 +63,8 @@
 
 \newcommand{\keyw}[1]{{\textbf{{\textsf{#1}}}}}
 \newcommand{\Do}{\keyw{do}\;}
+\usepackage{xspace}
+\newcommand{\Met}{\textsc{Met}\xspace}
 
 \usepackage{fontawesome5}
 \newcommand{\lock}{\textsf{\scriptsize\faLock}}
@@ -114,16 +116,30 @@
 \begin{document}
 \sloppy
 \begin{abstract}
-  Effect handlers are a programming construct allowing users to define and
-  combine computational effects, such as cooperative concurrency. To add
-  handlers without compromising safety, one can use a static type-and-effect
-  system. The implementation of cooperative concurrency with a higher-order fork
-  reveals limitations of such systems.
-
-  We first illustrate these limitations by implementing cooperative concurrency
-  in four existing languages. We then present a new language based on modal
-  effect types, which we use to implement cooperative concurrency with a
-  higher-order fork.
+  Effect handlers are a powerful programming construct allowing users
+  to define and combine computational effects, such as cooperative
+  concurrency.
+  %
+  Effect systems statically track the effects that a program can
+  perform.
+  %
+  Traditional effect systems rely on effect variables to give modular
+  type signatures for higher-order functions, while recent work on
+  modal effect types (\Met) reduce the need of these effect variables
+  via modalities.
+  %
+  However, for a higher-order fork operation which takes a child
+  process as argument, in order to allow the child process to perform
+  arbitrary effects, \Met still requires effect variables.
+  %
+  We propose a simple solution that enables writing a higher-order
+  fork in \Met without effect variables meanwhile not restricting the
+  child process.
+  %
+  % We first illustrate these limitations by implementing cooperative concurrency
+  % in four existing languages. We then present a new language based on modal
+  % effect types, which we use to implement cooperative concurrency with a
+  % higher-order fork.
 \end{abstract}
 \maketitle
 \section{Introduction}
@@ -132,40 +148,73 @@ cooperative concurrency~\cite{structuredasync2017}, which can be modelled using
 an effect with two operations: \textsf{fork} creates a new task; \textsf{yield}
 pauses the current one.
 %
-\sam{The following is not really true. Most real implementations of concurrency in these languages use a higher-order fork effect. What are we actually trying to say here?}
-\aghilas{I wanted to say that we can easily implement the unix style fork in all of these languages}
+% \sam{The following is not really true. Most real implementations of concurrency in these languages use a higher-order fork effect. What are we actually trying to say here?}
+% \aghilas{I wanted to say that we can easily implement the unix style fork in all of these languages}
 %
-The languages we will consider here can easily implement multitasking with a
-UNIX-style fork of type $\textsf{unit} \twoheadrightarrow
-\textsf{bool}$~\cite{hillerstrom2021thesis}. The continuation receives a boolean
-indicating whether it is the parent or child, like in the following piece of
-\textsc{Metl} code.
+There are two different styles for the \textsf{fork} operation.
+%
+One is the UNIX-style fork of type $\textsf{unit} \twoheadrightarrow
+\textsf{bool}$~\cite{hillerstrom2021thesis}.
+%
+The continuation receives a boolean indicating whether it is the
+parent or child in the following code.
 \begin{lstlisting}[style=metl]
-  if do fork () then
-    print "parent"
-  else
-    print "child"
+  if do fork () then print "parent"
+                else print "child"
 \end{lstlisting}
-The approach above to multitasking relies on multi-shot continuations,
-but many important existing languages only support single-shot
+%
+This approach relies on multi-shot continuations, which is not
+suitable for industrial languages that only support single-shot
 continuations~\cite{ocamleffect2021, wasmeffect2023}.
 
-By taking an alternative approach, one can in fact implement
-cooperative concurrency with single-shot
-continuations~\cite{dolan2015effective, ocamleffect2021}. In OCaml, an
-alternative fork operation can be given following signature.
-\begin{lstlisting}[style=ocaml]
-  type _ Effect.t += Fork : (unit -> unit) -> unit t
+The other style is the higher-order fork of type $(\textsf{unit} \to
+\textsf{unit}) \twoheadrightarrow
+\textsf{unit}$~\cite{dolan2015effective, ocamleffect2021}.
+%
+% By taking an alternative approach, one can in fact implement
+% cooperative concurrency with single-shot
+% continuations~\cite{dolan2015effective, ocamleffect2021}. In OCaml, an
+% alternative fork operation can be given following signature.
+% \begin{lstlisting}[style=ocaml]
+%   type _ Effect.t += Fork : (unit -> unit) -> unit t
+% \end{lstlisting}
+% This operation takes as input a thunk of the computation which the new
+% task should run. The scheduler maintains a queue of thunks that it
+% runs. As OCaml has no static effect system, the type is
+% straightforward.
+This operation takes a thunk of the computation, which is a function
+of type $\textsf{unit}\to\textsf{unit}$, for the child process.
+%
+The same program as above is written as follows with higher-order fork.
+\begin{lstlisting}[style=metl]
+  do fork (fun () -> print "child");
+  print "parent"
 \end{lstlisting}
-This operation takes as input a thunk of the computation which the new
-task should run. The scheduler maintains a queue of thunks that it
-runs. As OCaml has no static effect system, the type is
-straightforward.
 
-We present implementations of a scheduler for cooperative concurrency with
-higher-order fork in Koka, Frank, Effekt and \textsc{Metl}. Then, we introduce a
-new approach for combining higher-order effects and modal effect types and use a
-language following this approach to implement such a scheduler.
+Higher-order fork is more suitable for languages with single-shot
+continuations and enjoys more interesting equational
+theories~\cite{KammarLLMS26}, meanwhile presenting extra challenges
+for effect systems.
+%
+Traditional effect systems typically annotate function arrows with
+effects, so the argument type $(\textsf{unit} \to
+\textsf{unit})$ of \textsf{fork} has to be annotated with the effects
+that the child process might perform.
+%
+As a result, we have to use effect variables if we want to
+parameterise over the effects that the child process might perform.
+
+Modal effect types (\Met) provide an elegant way to avoid effect
+variables for higher-order functions, but still requires effect
+variables for higher-order effects such as the higher-order fork.
+%
+In the remaining of this extended abstract, we first present
+implementations of higher-order fork in existing effect systems (Koka,
+Frank, Effekt, and \Met), demonstrate why effect variables are needed,
+and introduce a simple extension to \Met which allows us to write
+higher-order fork modally without effect variables.
+
+
 \section{Implementation in four languages}\label{impl}
 We will now overview implementations of a cooperative concurrency effect with a
 fork that takes a thunk as input. To demonstrate compositionality of the
