@@ -1,0 +1,38 @@
+import dequeue
+
+interface Co[A, B] {
+  def yield(): Unit
+  def fork(p: Process[A, B]): Unit
+}
+
+type Process[A, B] =
+  ({ cap: A => B } => (() => Unit / Co[A, B] at {cap})) at {}
+
+def scheduler[A, B](prog: Process[A, B]) { cap: A => B } =
+  region this {
+  var queue: Dequeue[() => Unit at {this, cap}] in this =
+    emptyQueue();
+
+  def run_next(): Unit = queue.popBack match {
+    case None() => ()
+    case Some((p, q)) =>
+      queue = q
+      p()
+  }
+
+  def schedule(proc: () => Unit / Co[A, B] at {cap}): Unit = {
+    try { proc() } with Co[A, B] {
+      def yield() = {
+        queue = queue.pushFront(box { resume(()) });
+        run_next()
+      }
+      def fork(child) = {
+        queue = queue.pushFront(box { resume(()) });
+        schedule(unbox child { cap })
+      }
+    };
+    run_next()
+  }
+
+  schedule(unbox prog { cap })
+}

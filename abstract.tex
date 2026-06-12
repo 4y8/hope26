@@ -334,6 +334,9 @@ operation.
 \wenhao{We may want to elaborate on how MET works and how the new
 approach works, and perhaps save some space by cutting off some texts
 from Frank and Effekt sections.}
+
+As we have seen, in order to implement a higher-order fork operation
+
 %
 The unsatisfactory solution in \textsc{Metl} motivates the search for new ways
 to extend the core calculus with support for polymorphic higher-order effects. We have
@@ -375,16 +378,16 @@ system with the one with effect variables.
 \printbibliography
 \appendix
 \section{Koka}
-\lstinputlisting[style=koka]{impl/koka.kk}
+\lstinputlisting[style=koka]{app/koka.kk}
 \section{Frank}
-\lstinputlisting[style=frank]{impl/frank.fk}
+\lstinputlisting[style=frank]{app/frank.fk}
 \section{\textsc{Metl} with effect variables}
-\lstinputlisting[style=metl]{impl/metl-eff-var.met}
+\lstinputlisting[style=metl]{app/metl-eff-var.met}
 \section{Effekt}
 \subsection{Boxed functions}
-\lstinputlisting[style = effekt]{impl/effekt-boxes.effekt}
+\lstinputlisting[style = effekt]{app/effekt-boxes.effekt}
 \subsection{Bidirectional effects}
-\lstinputlisting[style = effekt]{impl/effekt-bieff-with-abort.effekt}
+\lstinputlisting[style = effekt]{app/effekt-bieff-with-abort.effekt}
 \subsection{Additional comments}
 The version with bidirectional effects resumes the continuation twice. Effekt's
 type system reject the following handler for \texttt{\small forkOp}, which would
@@ -404,7 +407,7 @@ itself. However, we could not implement such a queue while staying in Effekt's
 lexical requirements.
 \section{\textsc{Metl} with higher-order effects}
 \subsection{Implementation}
-\lstinputlisting[style=metl]{impl/metl-ho-eff.met}
+\lstinputlisting[style=metl]{app/metl-ho-eff.met}
 \subsection{Theory}\label{theory}
 The syntax annotates each effect type with an \emph{accidental}: a flat
 signature $A\twoheadrightarrow^\flat B$ has operands of absolute types, and a
