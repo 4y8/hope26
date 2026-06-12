@@ -183,7 +183,7 @@ system.
     ctl fork (p : () -> <co<e>,div|e> unit) : unit
 \end{lstlisting}
 Koka's positivity checker requires the \textsf{div} keyword before the
-declaration, and all signatures bear the \textsf{div} effect, which signals
+declaration. All signatures bear the \textsf{div} effect, which signals
 potential non-termination. The recursive type of processes is also
 effect-polymorphic:
 \begin{lstlisting}[style=koka]
@@ -219,11 +219,10 @@ the scheduler has the following variable-free type.
 \begin{lstlisting}[style=Frank]
   {<Co>Unit -> [Queue Proc]Unit}
 \end{lstlisting}
-The type checker desugars this type to:
-\aghilas{should we remove that?}
-\begin{lstlisting}[style = Frank]
-  {<Co e>Unit -> [Queue (Proc e), e]Unit}
-\end{lstlisting}
+%The type checker desugars this type to:
+%\begin{lstlisting}[style = Frank]
+%  {<Co e>Unit -> [Queue (Proc e), e]Unit}
+%\end{lstlisting}
 
 But Frank's approach is unsatisfactory as it only relies on syntax.
 \subsection{\textsc{Met}}
@@ -260,8 +259,8 @@ To ensure effect safety, operations can only yield values whose meaning is
 independent from the ambient effect context, which is not the case of arrow
 types, as they may use any effect in the context. Yielding a function is only
 possible by first boxing it in an \emph{absolute} modality that fixes the set of
-effects it can perform. However, to be able to compose cooperative concurrency
-with any effect, we cannot fix a set of effects and need to bring back effect
+effects it can perform. To be able to compose cooperative concurrency with any
+effect, we cannot fix a set of effects and need to bring back effect
 variables~\cite[Section~2.10]{tang2025modal}.
 \begin{lstlisting}[style=metl]
   eff co (e : Effect)
