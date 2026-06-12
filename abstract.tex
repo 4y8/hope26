@@ -230,6 +230,7 @@ the scheduler has the following variable-free type.
 
 %But Frank's approach is unsatisfactory as it only relies on syntax.
 \subsection{\textsc{Met}}
+\label{sec:met}
 
 Modal effect types (\textsc{Met}) decouple effects from function types
 via modalities~\cite{tang2025modal, tang2026modal} and enable similar
@@ -327,30 +328,59 @@ operation.
   def fork { p: => Unit / Co }: Unit / Co =
     do forkOp { p(); do abort() }
 \end{lstlisting}
+
+\wenhao{TODO: Move bidirectional effects to the appendix.}
+
 \section{Higher-order effects in \textsc{Met}}
+
+As we have seen, in order to implement a higher-order fork effect that
+allows the child process to perform any effect, we have to use effect
+variables either explicitly or implicitly in most of the existing
+effect systems such as Koka, Frank, Effekt, and \textsc{Met}.
 %
-\wenhao{We may want to elaborate on how MET works and how the new
-approach works, and perhaps save some space by cutting off some texts
-from Frank and Effekt sections.}
+This is particularly unsatisfactory for \textsc{Met}, as \textsc{Met}
+is designed to avoid effect variables.
 
-As we have seen, in order to implement a higher-order fork operation
-
+We identify the root cause of this issue in \textsc{Met}.
 %
-The unsatisfactory solution in \textsc{Metl} motivates the search for new ways
-to extend the core calculus with support for polymorphic higher-order effects. We have
-implemented a promising approach: relax kind restrictions on operations’
-operands, but restrict subeffecting in presence of non-absolute types. These
-conditions should ensure that a non-absolute value arrives to an effect context
-more permessive than the one it comes from. Appendix~\ref{theory} presents the
-essential rules.
+Effect tracking of \textsc{Met} relies on the fact that we are aware
+of the switches between effect contexts, while higher-order effects
+such as the higher-order fork allows us to capture a closure as an
+operation argument and later call it at the handler side, which
+enables switching between effect contexts in an opaque way.
+%
+As a result, we have to fully specify which effects might be performed
+by the captured closure with an absolute modality as in
+Section~\ref{sec:met}, and consequently, we have to bring back effect
+variables to be parameterised over the effects that the closure might
+perform.
 
-With these new rules, the declaration below is well-typed and models
-concurrency.
+We propose a clean solution to this issue without effect variables.
+%
+Our key idea is to impose an ordering on effects in effect contexts so
+that this order reflects the order of their handlers in the evaluation
+context.
+%
+As a result, when we call a higher-order operation such as fork,
+the effects that would still be available when the captured closure is
+called are exactly those that are after the fork effect in the effect
+context, since their handlers come before the handler of fork.
+
+% The unsatisfactory solution in \textsc{Metl} motivates the search for new ways
+% to extend the core calculus with support for polymorphic higher-order effects. We have
+% implemented a promising approach: relax kind restrictions on operations’
+% operands, but restrict subeffecting in presence of non-absolute types. These
+% conditions should ensure that a non-absolute value arrives to an effect context
+% more permessive than the one it comes from. Appendix~\ref{theory} presents the
+% essential rules.
+
+With our new solution, the cooperative concurrency effect is defined
+as follows.
 \begin{lstlisting}[style=metl]
   eff! co = fork : (unit -> unit) => unit
           | yield : unit => unit
 \end{lstlisting}
-The bang indicates that the effect can yield and receive any value. Unlike in
+The bang indicates that operations can yield and receive any value. Unlike in
 previous implementations, the signature of \textsf{fork} does not mention the
 \textsf{co} effect. In fact, the thunk will have the same ambient effect context
 as the computation that yielded it, which contains effect \textsf{co}. For the
@@ -372,6 +402,9 @@ scheduler still masks the \textsf{queue} effect.
 
 For now, we lack a proof of safety and an expressivity result relating this
 system with the one with effect variables.
+
+\wenhao{Would it make sense to modify the implementation to automatically
+wrap the argument, instead of requiring the effect to be the first?}
 
 \printbibliography
 \appendix
