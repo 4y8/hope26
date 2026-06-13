@@ -154,10 +154,6 @@ pauses the current one.
 %
 There are two canonical forms of fork operation we might consider.
 
-\sam{We use a double-headed arrow for signatures here and then switch
-  to a fat arrow when we introduce \Met. We should use the same
-  notation in both places!}
-
 The first form of fork is a UNIX(-style) fork operation of type
 $\textsf{unit} \Rightarrow
 \textsf{bool}$~\cite{hillerstrom2021thesis} (we denote operation
@@ -582,10 +578,18 @@ lexical requirements.
 \lstinputlisting[style=metl]{app/metl-ho-eff.met}
 
 
+%% SL: I think this is helpful, so I've restored it for now...
+
 % WT: Given that we have more explanations in the main text, I don't
 % think we need this appendix any more.
-\iffalse
+%\iffalse
 \subsection{Theory}\label{theory}
+\sam{Is this an extension of the OOPSLA 2025 presentation or the POPL
+  2026 presentation?}
+%
+We here spell out the changes to the formal rules of
+\Met~\cite{tang2025modal} necessary to support our extension.
+%
 The syntax annotates each effect type with an \emph{accidental}: a flat
 signature $A\twoheadrightarrow^\flat B$ has operands of absolute types, and a
 sharp signature $A\twoheadrightarrow^\sharp B$ has no restriction. Effect
@@ -601,8 +605,8 @@ signatures.
 \end{tabular}
 \end{center}
 The extension equivalence rules fix the position of sharp signatures. Effect
-context equivalence obeys the same rules. All of the following rules suppose a
-the existence of global label context $\Sigma$.
+context equivalence obeys the same rules. All of the following rules suppose
+the existence of a global label context $\Sigma$.
 \begin{mathpar}
   \inferrule{\\}{\cdot\equiv\cdot}
 
@@ -627,8 +631,7 @@ Subeffecting of extensions allows moving sharp labels backward.
 For subeffecting, effect contexts follow the same rules as extensions with the
 addition of $\cdot\leqslant E$.
 
-The rules for $\keyw{do}$ ensure that a sharp operation is available only if
-first of the ambient effect context.
+The rules for $\keyw{do}$ ensure that a sharp operation is available only if it appears as the first operation in the ambient effect context.
 \begin{mathpar}
   \inferrule[\textsc{T-DoFlat}]
     {E = D,\ell,F\\
@@ -658,8 +661,8 @@ modalities.
      \{\keyw{return }x\mapsto N,\ell\;p\;r\mapsto N'\}
      : B\; @\; F}
 \end{mathpar}
-Handling flat operation works the same way as usual \textsc{Met}.
-\fi
+Handling flat operation works the same way as usual in \textsc{Met}.
+%\fi
 \end{document}
 
 % LocalWords:  bool boolean equational Koka Effekt modally enqueue
