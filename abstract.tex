@@ -247,13 +247,13 @@ effect types without effect variables.
 
 \section{Higher-order fork in existing languages}\label{impl}
 
-In this section, we outline implementations of a cooperative
+In this section, we briefly sketch how to implement a cooperative
 concurrency effect incorporating a higher-order fork operation in
 existing languages with effect handlers and effect systems.
 %
 Our implementations of schedulers use a parametric queue effect to store thunks.
 %
-All the implementations are available in the appendix and
+The full implementations are available in the appendix and
 \href{https://github.com/4y8/hope26}{online}.
 
 \paragraph{Koka}
@@ -295,7 +295,6 @@ they use explicitly.
 In order to parameterise over the capabilities that the child process
 might use, we must introduce an explicit capability variable, which
 is reminiscent of the effect variables in Koka and \textsc{Met}.
-
 
 \section{Higher-order fork in \MetVar}
 \label{sec:met}
