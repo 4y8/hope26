@@ -144,10 +144,10 @@
 \end{abstract}
 \maketitle
 \section{Introduction}
-Effect handlers can express many control-flow constructs. One example is
-cooperative concurrency~\cite{structuredasync2017}, which can be modelled using
-an effect with two operations: \textsf{fork} creates a new task; \textsf{yield}
-pauses the current one.
+Effect handlers can express many control-flow constructs. One example
+is cooperative concurrency~\cite{structuredasync2017}, which can be
+modelled using an effect with two operations: \textsf{fork} creates a
+new child process; \textsf{yield} pauses the current process.
 %
 % \sam{The following is not really true. Most real implementations of concurrency in these languages use a higher-order fork effect. What are we actually trying to say here?}
 % \aghilas{I wanted to say that we can easily implement the unix style fork in all of these languages}
@@ -217,14 +217,20 @@ Traditional effect systems annotate function arrows with effects, so the
 argument type $(\textsf{unit} \to \textsf{unit})$ of \textsf{fork} would
 typically be annotated with the effects that the child process might
 perform. Annotating arrows with the effects they can perform between square
-brackets, a scheduler would have a type looking like:
+brackets, a suitable scheduler could have a type a long the lines:@
 \begin{lstlisting}[style=metl]
   forall e . (unit ->[co e, queue (proc e), e] unit)
     ->[co e, queue (proc e), e] unit
 \end{lstlisting}
 %
-As a result, we must use effect variables if we want to parameterise
-over the effects that the child process might perform.
+where \lstinline[style=metl]{co} is the concurrency effect (admitting
+\lstinline[style=metl]{fork} and \lstinline[style=metl]{yield}
+operations), the \lstinline[style=metl]{queue} effect abstracts over
+the queue of concurrent processes and \lstinline[style=metl]{proc} is
+a type of suspended processes.
+%
+We rely on the effect variable \lstinline[style=metl]{e} to
+parameterise over the effects that the child process may perform.
 
 Modal effect types (\Met) provide an elegant way to avoid effect variables for
 higher-order functions, but still requires effect variables for higher-order
