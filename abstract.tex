@@ -305,12 +305,9 @@ via modalities~\cite{tang2025modal, tang2026modal} and enable type
 signatures similarly succinct to Frank's without relying on fragile
 syntactic sugar.
 %
-The central notion of \text{Met} is the \emph{effect context}, which
-determines the effects that a term can use.
-%
-Modalities then transform the ambient effect context.
-%
-% Typing judgements track the ambient effect context.
+The central notions of \text{Met} are the \emph{effect context}, which
+determines the effects provided by the environment, and
+\emph{modalities}, which transform the effect context.
 %
 For example, a \lstinline{map} function has the following type
 signature.
@@ -319,7 +316,7 @@ signature.
   val map : forall a b. []((a -> b) -> list a -> list b)
 \end{lstlisting}
 %
-The \lstinline{[]} is an absolute modality which transforms the ambient effect context by discarding it and replacing it with the empty effect context, since
+The \lstinline{[]} is an \emph{absolute modality} which transforms the ambient effect context by discarding it and replacing it with the empty effect context, since
 the definition of \lstinline{map} itself uses no effect.
 %
 %% SL: May be helpful to say something like this:
