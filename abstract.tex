@@ -302,6 +302,8 @@ syntactic sugar.
 The central notion of \text{Met} is the \emph{effect context}, which
 determines the effects that a term can use.
 %
+Modalities then manipulate ambient effect context.
+%
 % Typing judgements track the ambient effect context.
 %
 For example, a \lstinline{map} function has the following type
@@ -462,11 +464,28 @@ as follows.
   eff! co = fork : (unit -> unit) => unit
           | yield : unit => unit
 \end{lstlisting}
-The bang indicates that \textsf{co} is a higher order-effect.
+The bang indicates that \textsf{co} is a higher order-effect, allowing
+\textsf{fork} to take as input a function.
 %
 \sam{This description of bang is entirely opaque. Most readers will
   have no idea what it is intended to mean.}
 %
+In presence of a function
+\lstinline[style = metl]{f : <queue unit>(unit -> unit) -> unit}, the typing
+rules reject the unsafe program below, which would allow the queue effect to
+leak~\cite[Section~2.10]{tang2025modal}.
+\begin{lstlisting}[style = metl,escapechar=\%]]
+  handle f %\underline{(fun () -> do fork (fun () -> do enqueue ()))}% with
+  | return _ => fun () -> ()
+  | fork p _ => p
+  | yield _ _ => fun () -> ()
+\end{lstlisting}
+The modality \lstinline[style = metl]{<queue unit>} is \emph{relative}. Instead
+of replacing the ambient effect context with an independent one, relative
+modalities extend it. Here, the modality adds the queue effect in front of the
+effect context of the underlined thunk. The ordering condition ensure that
+\textsf{fork} cannot be performed in this context, where it is not first.
+
 Unlike in previous implementations, the signature of \textsf{fork}
 does not mention the \textsf{co} effect. In fact, the thunk will have
 the same ambient effect context as the computation that yielded it,
@@ -477,10 +496,6 @@ the following type.
 \begin{lstlisting}[style=metl]
   [queue (unit -> unit)](<co>(unit -> unit) -> unit)
 \end{lstlisting}
-The type \lstinline[style = metl]{<co>(unit -> unit)} has a \emph{relative}
-modality. Instead of replacing the ambient effect context with an independent
-one, relative modalities extend it. Here, \lstinline[style = metl]{<co>} adds
-the \textsf{co} effect in front of the effect context.
 %% Another difference with the implementations of Section~\ref{impl} is
 %% the absence of masking.
 %
