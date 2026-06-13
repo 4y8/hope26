@@ -228,11 +228,11 @@ over the effects that the child process might perform.
 
 Modal effect types (\Met) provide an elegant way to avoid effect variables for
 higher-order functions, but still requires effect variables for higher-order
-operations such as higher-order fork. We call $\Met^\textsf{EffVar}$ the system
+operations such as higher-order fork. We call $\Met^\epsilon$ the system
 obtained by adding effect variables to \Met.
 %
 In the rest of this extended abstract, we briefly describe implementations of
-higher-order fork in existing effect systems (Koka, Frank, Effekt, and $\Met^\textsf{EffVar}$),
+higher-order fork in existing effect systems (Koka, Frank, Effekt, and $\Met^\epsilon$),
 demonstrate why effect variables are needed, and introduce $\Met^\textsf{HO}$ a
 simple extension to \Met which enables us to write higher-order fork using modal
 effect types without effect variables.
@@ -289,7 +289,7 @@ might use, we must introduce an explicit capability variable, which
 is reminiscent of the effect variables in Koka and \textsc{Met}.
 
 
-\section{Higher-order fork in $\Met^\textsf{EffVar}$}
+\section{Higher-order fork in $\Met^\epsilon$}
 \label{sec:met}
 
 Modal effect types (\textsc{Met}) decouple effects from function types
@@ -491,7 +491,10 @@ the following type.
 
 All in all, $\Met^\textsf{HO}$ offers a structural way to fix the set of effects
 the operands of an operation can perform. In the case of higher-order fork, this
-new system eliminates the need for effect variables.
+new system eliminates the need for effect variables. Future work includes:
+extending modalities to also act on effects to increase the flexibility of
+$\Met^\textsf{HO}$, and inserting masks instead of requiring higher-order
+operations to come from the first effect in the context.
 %% Another difference with the implementations of Section~\ref{impl} is
 %% the absence of masking.
 %
@@ -533,7 +536,7 @@ the effect to be the first?}
 \lstinputlisting[style=koka]{app/koka.kk}
 \section{Frank}
 \lstinputlisting[style=frank]{app/frank.fk}
-\section{\textsc{Metl} with effect variables}
+\section{$\Met^\epsilon$}
 \lstinputlisting[style=metl]{app/metl-eff-var.met}
 
 \section{Effekt}
