@@ -74,16 +74,16 @@
 
 %% Margin notes.
 %% For submission, comment all the following lines out ...
-\paperwidth    =\dimexpr\paperwidth     + 4cm\relax
-\oddsidemargin =\dimexpr\oddsidemargin  + 2cm\relax
-\evensidemargin=\dimexpr\evensidemargin + 2cm\relax
-\marginparwidth=\dimexpr\marginparwidth + 2.2cm\relax
-\usepackage{todonotes,setspace}
-\newcommand{\todobox}[3]{{\todo[color=#1!20,bordercolor=#1!80]{%
-  \begin{spacing}{0.9}\footnotesize\textbf{#2:} #3\end{spacing}}}}
-\newcommand{\wenhao}[1]{\todobox{blue}{Wenhao}{#1}}
-\newcommand{\aghilas}[1]{\todobox{red}{Aghilas}{#1}}
-\newcommand{\sam}[1]{\todobox{yellow}{Sam}{#1}}
+%\paperwidth    =\dimexpr\paperwidth     + 4cm\relax
+%\oddsidemargin =\dimexpr\oddsidemargin  + 2cm\relax
+%\evensidemargin=\dimexpr\evensidemargin + 2cm\relax
+%\marginparwidth=\dimexpr\marginparwidth + 2.2cm\relax
+%\usepackage{todonotes,setspace}
+%\newcommand{\todobox}[3]{{\todo[color=#1!20,bordercolor=#1!80]{%
+%  \begin{spacing}{0.9}\footnotesize\textbf{#2:} #3\end{spacing}}}}
+%\newcommand{\wenhao}[1]{\todobox{blue}{Wenhao}{#1}}
+%\newcommand{\aghilas}[1]{\todobox{red}{Aghilas}{#1}}
+%\newcommand{\sam}[1]{\todobox{yellow}{Sam}{#1}}
 %% ... up to here
 
 \usepackage{mathpartir}
@@ -470,7 +470,7 @@ rules reject the unsafe program below, which would allow the queue effect to
 leak~\cite[Section~2.10]{tang2025modal}.
 \begin{lstlisting}[style = metl,escapechar=\%]]
   handle f %\underline{(fun () -> do fork (fun () -> do enqueue ()))}% with
-    -- omitted code for handler clauses of yield and fork
+    | fork p _ => p -- we omit the other clauses
 \end{lstlisting}
 The modality \lstinline[style = metl]{<queue unit>} is
 a \emph{relative} modality, which extends the ambient effect context
@@ -539,9 +539,9 @@ higher-order operations to come from the first effect in the context.
 %%   finish with some kind of convincing conclusion, takeaway message, or
 %%   exciting proposal for future work.}
 
-\wenhao{Would it make sense to modify the implementation to automatically
-wrap the argument when calling higher-order fork, instead of requiring
-the effect to be the first?}
+%\wenhao{Would it make sense to modify the implementation to automatically
+%wrap the argument when calling higher-order fork, instead of requiring
+%the effect to be the first?}
 
 \printbibliography
 \appendix
