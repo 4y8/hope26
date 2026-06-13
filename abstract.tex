@@ -430,7 +430,6 @@ As a result, we must fully specify which effects may be performed by
 the child process via an absolute modality as in
 Section~\ref{sec:met}, and consequently, we use effect variables to
 parameterise over over the effects that the closure might perform.
-<<<<<<< HEAD
 %% SL: Alternative text... do we need to reincorporate any of this?
 %% =======
 %% As a result, we must fully specify which effects might be performed by
@@ -448,14 +447,14 @@ Following this observation, We propose \MetHO.
 %
 Our key idea is to impose an order on effects in effect contexts
 reflecting the order of handlers in the evaluation context.
-=======
+%% =======
 
-We propose \MetHO, a simple solution to avoid effect variables.
-%
-Our key idea is to impose an ordering on effects in effect contexts so
-that this order reflects the order of their handlers in the evaluation
-context.
->>>>>>> 780c223ce5fb1bd20980fcaf0496229d8a7af879
+%% we propose \MetHO, a simple solution to avoid effect variables.
+%% %
+%% Our key idea is to impose an ordering on effects in effect contexts so
+%% that this order reflects the order of their handlers in the evaluation
+%% context.
+%% >>>>>>> 780c223ce5fb1bd20980fcaf0496229d8a7af879
 %
 As a result, when we call a higher-order operation such as fork, the
 effects available when the child process is called are exactly those
