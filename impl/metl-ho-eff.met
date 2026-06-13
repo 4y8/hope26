@@ -2,10 +2,10 @@ type unit = Unit
 
 type option a = None | Some of a
 
-eff! co = fork : (unit -> unit) => unit
+eff# co = fork : (unit -> unit) => unit
         | yield : unit => unit
 
-eff! queue a = enqueue : a => unit
+eff# queue a = enqueue : a => unit
              | dequeue : unit => option a
 
 val next : [queue {unit}](unit -> unit)
