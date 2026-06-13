@@ -302,7 +302,7 @@ syntactic sugar.
 The central notion of \text{Met} is the \emph{effect context}, which
 determines the effects that a term can use.
 %
-Modalities then manipulate ambient effect context.
+Modalities then transform the ambient effect context.
 %
 % Typing judgements track the ambient effect context.
 %
@@ -313,9 +313,13 @@ signature.
   val map : forall a b. []((a -> b) -> list a -> list b)
 \end{lstlisting}
 %
-The \lstinline{[]} is an absolute modality indicating that the effect
-context of the definition of \lstinline{map} is empty, since
-\lstinline{map} itself uses no effect.
+The \lstinline{[]} is an absolute modality which transforms the ambient effect context by discarding it and replacing it with the empty effect context, since
+the definition of \lstinline{map} itself uses no effect.
+%
+%% SL: May be helpful to say something like this:
+%
+%% (Intuitively, one can think of this transformation applying to every
+%% arrow in the type \lstinline[style = metl]{(a -> b) -> list a -> list b}.)
 %
 We can apply \lstinline{map} to any effectful function, as long as the
 effect context at the call site provides the required effects.
@@ -335,7 +339,7 @@ case for arrow types, as they may use any effect in the
 context. Yielding a function is only possible by first boxing it in an
 \emph{absolute} modality that fixes the set of effects it can
 perform. To be able to compose cooperative concurrency with any
-effect, we cannot fix a set of effects and must bring back effect
+effect, we cannot fix a set of effects and rely on an extension with effect
 variables~\cite[Section~2.10]{tang2025modal}.
 \begin{lstlisting}[style=metl]
   eff co (e : Effect)
@@ -357,22 +361,24 @@ Because each arrow has an absolute modality, this signature is similar to the
 Koka one, and loses the advantages of modal effect types. Moreover, this
 implementation relies on a \emph{modality-parameterised
 handler}~\cite[Section~3.5]{tang2026modal}. These handlers wrap the continuation
-with a user-supplied modality. Here, this allows to fix the effects the
+with a user-supplied modality. Here, this allows us to fix the effects the
 continuation can perform with an absolute modality.
 
-\sam{There are two many definitions missing here for this to be
-  properly understood. What even is a modality? What is a
-  modality-parameterised handler? A citation to a paper isn't good
-  enough. At least a brief sentence to describe the intuition is
-  required.}
-
-\sam{In the next section some relative modalities appear out of thin
-  air. But relative modalities aren't described here or there. They
-  need to be.}
-
-\sam{Extended abstracts, just like papers, need to be pretty much
-  self-contained. Citations are good, but they cannot replace
-  explanations.}
+%% SL: mostly addressed
+%
+%% \sam{There are two many definitions missing here for this to be
+%%   properly understood. What even is a modality? What is a
+%%   modality-parameterised handler? A citation to a paper isn't good
+%%   enough. At least a brief sentence to describe the intuition is
+%%   required.}
+%
+%% \sam{In the next section some relative modalities appear out of thin
+%%   air. But relative modalities aren't described here or there. They
+%%   need to be.}
+%
+%% \sam{Extended abstracts, just like papers, need to be pretty much
+%%   self-contained. Citations are good, but they cannot replace
+%%   explanations.}
 
 \subsection{Effekt}
 
