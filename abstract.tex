@@ -429,7 +429,7 @@ the handler of fork.
 As a result, we must fully specify which effects may be performed by
 the child process via an absolute modality as in
 Section~\ref{sec:met}, and consequently, we use effect variables to
-parameterise over over the effects that the child process might perform.
+parameterise over the effects that the child process might perform.
 %
 % As a result, we must fully specify which effects might be performed by
 % the child process with an absolute modality as in
@@ -462,8 +462,7 @@ The cooperative concurrency effect is now defined as follows.
   eff# co = fork : (unit -> unit) => unit
           | yield : unit => unit
 \end{lstlisting}
-The hash (\texttt{\small \#}) indicates that \textsf{co} is a higher
-order-effect, allowing \textsf{fork} to take as input a function.
+The hash (\texttt{\small \#}) indicates that \textsf{co} is a higher-order effect, allowing \textsf{fork} to take as input a function.
 %
 %% SL: I think the following is now resolved
 %
