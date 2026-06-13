@@ -250,33 +250,9 @@ Koka has a traditional type-and-effect system where each arrow type holds a
 scoped row of the effects the function can
 perform~\cite{koka2014,scopedrows2005}.
 %
-We use an effect variable \lstinline{e} for the fork operation as
-follows.%
-\footnote{
-Koka's positivity checker would require a \textsf{div} effect for
-most function arrows in this section; we omit them for brevity.
-}
-%
-\begin{lstlisting}[style=koka]
-  div effect co<e>
-    ctl yield () : unit
-    ctl fork (p : () -> <co<e>|e> unit) : unit
-\end{lstlisting}
-%
-%
-The recursive type of processes is also
-effect-polymorphic:
-\begin{lstlisting}[style=koka]
-  div type proc<e>
-    Proc (p : () -> <queue<proc<e>>|e> unit)
-\end{lstlisting}
-Let \lstinline[style = koka]{qproc e = queue<proc<e>>}, the
-scheduler has type:
-\begin{lstlisting}[style=koka]
-  (() -> <co<e>, qproc<e>|e> unit) -> <qproc<e>|e> unit
-\end{lstlisting}
-
-The effect variable \lstinline{e} appears several times.
+We use an effect variable for the fork operation and to define an
+effect-polymorphic type of processes. The same effect variable appears on all
+arrows of the scheduler's type.
 
 \subsection{Frank}
 Embodying the observation that effect variables are almost always the
@@ -346,7 +322,7 @@ variables~\cite[Section~2.10]{tang2025modal}.
     = fork : [co e, e](unit -> unit) => unit
     | yield : unit => unit
 \end{lstlisting}
-We define the polymorphic type of processes like in Koka.
+We define a recursive polymorphic type of processes.
 \begin{lstlisting}[style=metl]
   type proc (e : Effect) =
     Proc of [queue (proc e), e](unit -> unit)
@@ -476,7 +452,7 @@ The bang indicates that \textsf{co} is a higher order-effect, allowing
 \sam{This description of bang is entirely opaque. Most readers will
   have no idea what it is intended to mean.}
 %
-In presence of a function
+For example, in presence of a function
 \lstinline[style = metl]{f : <queue unit>(unit -> unit) -> unit}, the typing
 rules reject the unsafe program below, which would allow the queue effect to
 leak~\cite[Section~2.10]{tang2025modal}.
