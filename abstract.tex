@@ -218,7 +218,7 @@ Traditional effect systems annotate function arrows with effects, so the
 argument type $(\textsf{unit} \to \textsf{unit})$ of \textsf{fork} would
 typically be annotated with the effects that the child process might
 perform. Annotating arrows with the effects they can perform between square
-brackets, a suitable scheduler could have a type a long the lines:@
+brackets, a suitable scheduler could have a type a long the lines:
 \begin{lstlisting}[style=metl]
   forall e . (unit ->[co e, queue (proc e), e] unit)
     ->[co e, queue (proc e), e] unit
