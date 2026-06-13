@@ -438,11 +438,11 @@ context.
 As a result, when we call a higher-order operation such as fork, the
 effects that would still be available when the child process is called
 are exactly those that follow the \textsf{co} effect in the effect context.
-
+%
 %% SL: mostly resolved
 %
 %% \wenhao{Would be helpful to give a concrete example here}
-
+%
 % The unsatisfactory solution in \textsc{Metl} motivates the search for new ways
 % to extend the core calculus with support for polymorphic higher-order effects. We have
 % implemented a promising approach: relax kind restrictions on operations’
@@ -450,9 +450,8 @@ are exactly those that follow the \textsf{co} effect in the effect context.
 % conditions should ensure that a non-absolute value arrives to an effect context
 % more permessive than the one it comes from. Appendix~\ref{theory} presents the
 % essential rules.
-
-With our new solution, the cooperative concurrency effect is defined
-as follows.
+%
+The cooperative concurrency effect is now defined as follows.
 \begin{lstlisting}[style=metl]
   eff# co = fork : (unit -> unit) => unit
           | yield : unit => unit
