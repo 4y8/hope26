@@ -489,9 +489,9 @@ the following type.
   [queue (unit -> unit)](<co>(unit -> unit) -> unit)
 \end{lstlisting}
 
-All in all, $\Met^\textsf{HO}$ offers a structural way to fix the set of effects
+In summary, $\Met^\textsf{HO}$ offers a structural way to fix the set of effects
 the operands of an operation can perform. In the case of higher-order fork, this
-new system eliminates the need for effect variables. Future work includes:
+new system eliminates the need for effect variables entirely. Future work includes:
 extending modalities to also act on effects to increase the flexibility of
 $\Met^\textsf{HO}$, and inserting masks instead of requiring higher-order
 operations to come from the first effect in the context.
@@ -520,10 +520,12 @@ operations to come from the first effect in the context.
 %% For now, we lack a proof of safety and an expressivity result relating this
 %% system with the one with effect variables.
 
-\sam{This is an extremely abrupt end. It would be good to give a bit
-  more detail on how this actually works. It would also be nice to
-  finish with some kind of convincing conclusion, takeaway message, or
-  exciting proposal for future work.}
+%% SL: more-or-less resolved
+
+%% \sam{This is an extremely abrupt end. It would be good to give a bit
+%%   more detail on how this actually works. It would also be nice to
+%%   finish with some kind of convincing conclusion, takeaway message, or
+%%   exciting proposal for future work.}
 
 \wenhao{Would it make sense to modify the implementation to automatically
 wrap the argument when calling higher-order fork, instead of requiring
@@ -600,17 +602,15 @@ lexical requirements.
 % think we need this appendix any more.
 %\iffalse
 \subsection{Theory}\label{theory}
-\sam{Is this an extension of the OOPSLA 2025 presentation or the POPL
-  2026 presentation?}
 %
 We here spell out the changes to the formal rules of
 $\Met(\mathcal{R}_{\textsf{scp}})$~\cite{tang2026modal} necessary to support our
 extension. We only consider here a simplified version without local labels and
-modality-paramterised handlers.
+modality-parameterised handlers.
 %
 The syntax annotates each effect type with an \emph{accidental}: a flat
-signature $A\twoheadrightarrow^\flat B$ has operands of absolute types, and a
-sharp signature $A\twoheadrightarrow^\sharp B$ has no restriction. Effect
+signature $A\Rightarrow^\flat B$ has operands of absolute types, and a
+sharp signature $A\Rightarrow^\sharp B$ has no restriction. Effect
 contexts and extensions are scoped rows of labels that a context map to
 signatures.
 \begin{center}
@@ -687,4 +687,4 @@ Handling flat operation works the same way as usual in \textsc{Met}.
 % LocalWords:  dequeue Koka's positivity ctl proc koka qproc forall
 % LocalWords:  effectful expressivity Metl metl effekt forkOp DoFlat
 % LocalWords:  Effekt's pushFront Subeffecting subeffecting DoSharp
-% LocalWords:  HandleSharp
+% LocalWords:  HandleSharp scheduler's scp
