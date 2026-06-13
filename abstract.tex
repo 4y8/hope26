@@ -226,15 +226,16 @@ brackets, a scheduler would have a type looking like:
 As a result, we must use effect variables if we want to parameterise
 over the effects that the child process might perform.
 
-Modal effect types (\Met) provide an elegant way to avoid effect
-variables for higher-order functions, but still requires effect
-variables for higher-order operations such as higher-order fork.
+Modal effect types (\Met) provide an elegant way to avoid effect variables for
+higher-order functions, but still requires effect variables for higher-order
+operations such as higher-order fork. We call $\Met^\textsf{EffVar}$ the system
+obtained by adding effect variables to \Met.
 %
-In the rest of this extended abstract, we briefly describe
-implementations of higher-order fork in existing effect systems (Koka,
-Frank, Effekt, and \Met), demonstrate why effect variables are needed,
-and introduce a simple extension to \Met which enables us to write
-higher-order fork using modal effect types without effect variables.
+In the rest of this extended abstract, we briefly describe implementations of
+higher-order fork in existing effect systems (Koka, Frank, Effekt, and $\Met^\textsf{EffVar}$),
+demonstrate why effect variables are needed, and introduce $\Met^\textsf{HO}$ a
+simple extension to \Met which enables us to write higher-order fork using modal
+effect types without effect variables.
 
 \section{Higher-order fork in existing languages}\label{impl}
 
@@ -242,14 +243,10 @@ In this section, we outline implementations of a cooperative
 concurrency effect incorporating a higher-order fork operation in
 existing languages with effect handlers and effect systems.
 %
-Our implementations of schedulers use a parametric queue effect with
-two operations (enqueue and dequeue) to store thunks.
-%
 All the implementations are available in the appendix and
 \href{https://github.com/4y8/hope26}{online}.
 
-
-\subsection{Koka}
+\paragraph{Koka}
 Koka has a traditional type-and-effect system where each arrow type holds a
 scoped row of the effects the function can
 perform~\cite{koka2014,scopedrows2005}.
@@ -258,7 +255,7 @@ We use an effect variable for the fork operation and to define an
 effect-polymorphic type of processes. The same effect variable appears on all
 arrows of the scheduler's type.
 
-\subsection{Frank}
+\paragraph{Frank}
 Embodying the observation that effect variables are almost always the
 same throughout a signature, the Frank programming language omits
 effect variables by default and uses syntactic sugar to automatically
@@ -271,7 +268,26 @@ variables~\cite[Section~6]{frank2020}.
 However, effect variables still exist during type checking and may
 leak into error messages displayed to the programmer.
 
-\subsection{\textsc{Met}}
+\paragraph{Effekt}
+Effekt tracks effects as capabilities~\cite{effekt2020,
+effekt2022}.
+% This approach relies on functions being second-class citizens in the language.
+%
+% This particularity offers two ways to define the cooperative concurrency effect,
+% none of which uses a queue effect. On the one hand,
+%
+Functions in Effekt are second-class citizens by default.
+%
+In order to make them first-class so that we can use them as arguments
+of \textsf{fork}, we have to box them and specify the capabilities
+they use explicitly.
+%
+In order to parameterise over the capabilities that the child process
+might use, we must introduce an explicit capability variable, which
+is reminiscent of the effect variables in Koka and \textsc{Met}.
+
+
+\section{Higher-order fork in $\Met^\textsf{EffVar}$}
 \label{sec:met}
 
 Modal effect types (\textsc{Met}) decouple effects from function types
@@ -360,25 +376,6 @@ continuation can perform with an absolute modality.
 %%   self-contained. Citations are good, but they cannot replace
 %%   explanations.}
 
-\subsection{Effekt}
-
-Effekt tracks effects as capabilities~\cite{effekt2020,
-effekt2022}.
-% This approach relies on functions being second-class citizens in the language.
-%
-% This particularity offers two ways to define the cooperative concurrency effect,
-% none of which uses a queue effect. On the one hand,
-%
-Functions in Effekt are second-class citizens by default.
-%
-In order to make them first-class so that we can use them as arguments
-of \textsf{fork}, we have to box them and specify the capabilities
-they use explicitly.
-%
-In order to parameterise over the capabilities that the child process
-might use, we must introduce an explicit capability variable, which
-is reminiscent of the effect variables in Koka and \textsc{Met}.
-
 %
 % Fork can take a first-class boxed function.
 % %
@@ -394,7 +391,7 @@ is reminiscent of the effect variables in Koka and \textsc{Met}.
 % \texttt{\small c}.
 % %
 
-\section{Higher-order fork in \textsc{Met}, modally}
+\section{Higher-order fork in $\Met^\textsf{HO}$}
 
 
 %% SL: mostly resolved
@@ -427,7 +424,7 @@ Section~\ref{sec:met}, and consequently, we must bring back effect
 variables to be parameterised over the effects that the closure might
 perform.
 
-We propose a simple solution following this observation.
+We propose $\Met^\textsf{HO}$, a simple solution following this observation.
 %
 Our key idea is to impose an ordering on effects in effect contexts so
 that this order reflects the order of their handlers in the evaluation
@@ -490,10 +487,9 @@ the following type.
   [queue (unit -> unit)](<co>(unit -> unit) -> unit)
 \end{lstlisting}
 
-
-Our new rules offer a structural way to fix the set of effects the operands of
-an operation can perform. In the case of higher-order fork, they can replace
-effect variables.
+All in all, $\Met^\textsf{HO}$ offers a structural way to fix the set of effects
+the operands of an operation can perform. In the case of higher-order fork, this
+new system eliminates the need effect variables.
 %% Another difference with the implementations of Section~\ref{impl} is
 %% the absence of masking.
 %
