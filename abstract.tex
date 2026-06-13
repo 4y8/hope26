@@ -243,6 +243,8 @@ In this section, we outline implementations of a cooperative
 concurrency effect incorporating a higher-order fork operation in
 existing languages with effect handlers and effect systems.
 %
+Our implementations of schedulers use a parametric queue effect to store thunks.
+%
 All the implementations are available in the appendix and
 \href{https://github.com/4y8/hope26}{online}.
 
@@ -489,7 +491,7 @@ the following type.
 
 All in all, $\Met^\textsf{HO}$ offers a structural way to fix the set of effects
 the operands of an operation can perform. In the case of higher-order fork, this
-new system eliminates the need effect variables.
+new system eliminates the need for effect variables.
 %% Another difference with the implementations of Section~\ref{impl} is
 %% the absence of masking.
 %
