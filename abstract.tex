@@ -282,7 +282,7 @@ syntactic sugar.
 The central notion of \text{Met} is the \emph{effect context}, which
 determines the effects that a term can use.
 %
-Modalities then manipulate ambient effect context.
+Modalities then transform the ambient effect context.
 %
 % Typing judgements track the ambient effect context.
 %
@@ -293,9 +293,13 @@ signature.
   val map : forall a b. []((a -> b) -> list a -> list b)
 \end{lstlisting}
 %
-The \lstinline{[]} is an absolute modality indicating that the effect
-context of the definition of \lstinline{map} is empty, since
-\lstinline{map} itself uses no effect.
+The \lstinline{[]} is an absolute modality which transforms the ambient effect context by discarding it and replacing it with the empty effect context, since
+the definition of \lstinline{map} itself uses no effect.
+%
+%% SL: May be helpful to say something like this:
+%
+%% (Intuitively, one can think of this transformation applying to every
+%% arrow in the type \lstinline[style = metl]{(a -> b) -> list a -> list b}.)
 %
 We can apply \lstinline{map} to any effectful function, as long as the
 effect context at the call site provides the required effects.
@@ -315,7 +319,7 @@ case for arrow types, as they may use any effect in the
 context. Yielding a function is only possible by first boxing it in an
 \emph{absolute} modality that fixes the set of effects it can
 perform. To be able to compose cooperative concurrency with any
-effect, we cannot fix a set of effects and must bring back effect
+effect, we cannot fix a set of effects and rely on an extension with effect
 variables~\cite[Section~2.10]{tang2025modal}.
 \begin{lstlisting}[style=metl]
   eff co (e : Effect)
@@ -337,22 +341,24 @@ Because each arrow has an absolute modality, this signature is similar to the
 one in the introduction, and loses the advantages of modal effect
 types. Moreover, this implementation relies on a \emph{modality-parameterised
 handler}~\cite[Section~3.5]{tang2026modal}. These handlers wrap the continuation
-with a user-supplied modality. Here, this allows to fix the effects the
+with a user-supplied modality. Here, this allows us to fix the effects the
 continuation can perform with an absolute modality.
 
-\sam{There are two many definitions missing here for this to be
-  properly understood. What even is a modality? What is a
-  modality-parameterised handler? A citation to a paper isn't good
-  enough. At least a brief sentence to describe the intuition is
-  required.}
-
-\sam{In the next section some relative modalities appear out of thin
-  air. But relative modalities aren't described here or there. They
-  need to be.}
-
-\sam{Extended abstracts, just like papers, need to be pretty much
-  self-contained. Citations are good, but they cannot replace
-  explanations.}
+%% SL: mostly addressed
+%
+%% \sam{There are two many definitions missing here for this to be
+%%   properly understood. What even is a modality? What is a
+%%   modality-parameterised handler? A citation to a paper isn't good
+%%   enough. At least a brief sentence to describe the intuition is
+%%   required.}
+%
+%% \sam{In the next section some relative modalities appear out of thin
+%%   air. But relative modalities aren't described here or there. They
+%%   need to be.}
+%
+%% \sam{Extended abstracts, just like papers, need to be pretty much
+%%   self-contained. Citations are good, but they cannot replace
+%%   explanations.}
 
 \subsection{Effekt}
 
@@ -390,8 +396,11 @@ is reminiscent of the effect variables in Koka and \textsc{Met}.
 
 \section{Higher-order fork in \textsc{Met}, modally}
 
-\sam{This section isn't really readable. Certainly an example would
-  help - as Wenhao says.}
+
+%% SL: mostly resolved
+%
+%% \sam{This section isn't really readable. Certainly an example would
+%%   help - as Wenhao says.}
 
 As we have seen, in order to implement a higher-order fork effect that
 allows the child process to perform any effect, we have to use effect
@@ -428,7 +437,9 @@ As a result, when we call a higher-order operation such as fork, the
 effects that would still be available when the child process is called
 are exactly those that follow the fork effect in the effect context.
 
-\wenhao{Would be helpful to give a concrete example here}
+%% SL: mostly resolved
+%
+%% \wenhao{Would be helpful to give a concrete example here}
 
 % The unsatisfactory solution in \textsc{Metl} motivates the search for new ways
 % to extend the core calculus with support for polymorphic higher-order effects. We have
@@ -447,8 +458,10 @@ as follows.
 The bang indicates that \textsf{co} is a higher order-effect, allowing
 \textsf{fork} to take as input a function.
 %
-\sam{This description of bang is entirely opaque. Most readers will
-  have no idea what it is intended to mean.}
+%% SL: I think the following is now resolved
+%
+%% \sam{This description of bang is entirely opaque. Most readers will
+%%   have no idea what it is intended to mean.}
 %
 For example, in presence of a function
 \lstinline[style = metl]{f : <queue unit>(unit -> unit) -> unit}, the typing
@@ -484,11 +497,13 @@ effect variables.
 %% Another difference with the implementations of Section~\ref{impl} is
 %% the absence of masking.
 %
-\sam{This is perplexing. We haven't said anything about
-  masking. Perhaps this is because of shipping code to the
-  appendix. In any case we must explain masking if we are to talk
-  about it. Ideally we'd try to avoid talking about it in the body of
-  the paper though.}
+%% SL: I think masking has now disappeared so this comment is resolved
+%
+%% \sam{This is perplexing. We haven't said anything about
+%%   masking. Perhaps this is because of shipping code to the
+%%   appendix. In any case we must explain masking if we are to talk
+%%   about it. Ideally we'd try to avoid talking about it in the body of
+%%   the paper though.}
 %
 %% The semantics wraps the operands of higher-order effects with the same
 %% masks as the yielding evaluation context. The first call to the
