@@ -392,8 +392,11 @@ is reminiscent of the effect variables in Koka and \textsc{Met}.
 
 \section{Higher-order fork in \textsc{Met}, modally}
 
-\sam{This section isn't really readable. Certainly an example would
-  help - as Wenhao says.}
+
+%% SL: mostly resolved
+%
+%% \sam{This section isn't really readable. Certainly an example would
+%%   help - as Wenhao says.}
 
 As we have seen, in order to implement a higher-order fork effect that
 allows the child process to perform any effect, we have to use effect
@@ -430,7 +433,9 @@ As a result, when we call a higher-order operation such as fork, the
 effects that would still be available when the child process is called
 are exactly those that follow the fork effect in the effect context.
 
-\wenhao{Would be helpful to give a concrete example here}
+%% SL: mostly resolved
+%
+%% \wenhao{Would be helpful to give a concrete example here}
 
 % The unsatisfactory solution in \textsc{Metl} motivates the search for new ways
 % to extend the core calculus with support for polymorphic higher-order effects. We have
@@ -449,8 +454,10 @@ as follows.
 The bang indicates that \textsf{co} is a higher order-effect, allowing
 \textsf{fork} to take as input a function.
 %
-\sam{This description of bang is entirely opaque. Most readers will
-  have no idea what it is intended to mean.}
+%% SL: I think the following is now resolved
+%
+%% \sam{This description of bang is entirely opaque. Most readers will
+%%   have no idea what it is intended to mean.}
 %
 For example, in presence of a function
 \lstinline[style = metl]{f : <queue unit>(unit -> unit) -> unit}, the typing
@@ -481,11 +488,13 @@ the following type.
 %% Another difference with the implementations of Section~\ref{impl} is
 %% the absence of masking.
 %
-\sam{This is perplexing. We haven't said anything about
-  masking. Perhaps this is because of shipping code to the
-  appendix. In any case we must explain masking if we are to talk
-  about it. Ideally we'd try to avoid talking about it in the body of
-  the paper though.}
+%% SL: I think masking has now disappeared so this comment is resolved
+%
+%% \sam{This is perplexing. We haven't said anything about
+%%   masking. Perhaps this is because of shipping code to the
+%%   appendix. In any case we must explain masking if we are to talk
+%%   about it. Ideally we'd try to avoid talking about it in the body of
+%%   the paper though.}
 %
 %% The semantics wraps the operands of higher-order effects with the same
 %% masks as the yielding evaluation context. The first call to the
