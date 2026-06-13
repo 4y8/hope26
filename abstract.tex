@@ -487,9 +487,9 @@ the following type.
   [queue (unit -> unit)](<co>(unit -> unit) -> unit)
 \end{lstlisting}
 
-All in all, $\Met^\textsf{HO}$ offers a structural way to fix the set of effects
+In summary, $\Met^\textsf{HO}$ offers a structural way to fix the set of effects
 the operands of an operation can perform. In the case of higher-order fork, this
-new system eliminates the need effect variables.
+new system eliminates the need for effect variables entirely.
 %% Another difference with the implementations of Section~\ref{impl} is
 %% the absence of masking.
 %
@@ -515,10 +515,12 @@ new system eliminates the need effect variables.
 %% For now, we lack a proof of safety and an expressivity result relating this
 %% system with the one with effect variables.
 
-\sam{This is an extremely abrupt end. It would be good to give a bit
-  more detail on how this actually works. It would also be nice to
-  finish with some kind of convincing conclusion, takeaway message, or
-  exciting proposal for future work.}
+%% SL: more-or-less resolved
+
+%% \sam{This is an extremely abrupt end. It would be good to give a bit
+%%   more detail on how this actually works. It would also be nice to
+%%   finish with some kind of convincing conclusion, takeaway message, or
+%%   exciting proposal for future work.}
 
 \wenhao{Would it make sense to modify the implementation to automatically
 wrap the argument when calling higher-order fork, instead of requiring
