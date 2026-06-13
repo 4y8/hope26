@@ -424,18 +424,10 @@ the handler of fork.
 % use it at the handler side, which enables switching between effect
 % contexts in an opaque way.
 %
-<<<<<<< HEAD
 As a result, we must fully specify which effects may be performed by
 the child process via an absolute modality as in
 Section~\ref{sec:met}, and consequently, we use effect variables to
 parameterise over over the effects that the closure might perform.
-=======
-As a result, we must fully specify which effects might be performed by
-the child process with an absolute modality as in
-Section~\ref{sec:met}, and consequently, we must bring back effect
-variables to be parameterised over the effects that the child process
-might perform.
->>>>>>> 6ac50d6 (tweaks in section 3)
 
 We propose \MetHO, a simple solution to avoid effect variables.
 %
