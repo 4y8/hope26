@@ -233,9 +233,9 @@ a type of suspended processes.
 We rely on the effect variable \lstinline[style=metl]{e} to
 parameterise over the effects that the child process may perform.
 
-Modal effect types (\Met) offer an elegant means of avoiding effect
-variables for higher-order functions, but still require effect
-variables for higher-order operations such as higher-order fork.
+Modal effect types (\Met) offer elegant means of avoiding effect variables for
+higher-order functions, but still require effect variables for higher-order
+operations such as higher-order fork.
 %
 We write \MetVar for the extension of \Met with effect variables.
 %
@@ -430,8 +430,20 @@ As a result, we must fully specify which effects may be performed by
 the child process via an absolute modality as in
 Section~\ref{sec:met}, and consequently, we use effect variables to
 parameterise over over the effects that the closure might perform.
+%% SL: Alternative text... do we need to reincorporate any of this?
+%% =======
+%% As a result, we must fully specify which effects might be performed by
+%% the child process with an absolute modality as in
+%% Section~\ref{sec:met}, and consequently, we must bring back effect
+%% variables to be parameterised over the effects that the child process
+%% might perform.
+%% >>>>>>> 6ac50d6 (tweaks in section 3)
 
 Following this observation, We propose \MetHO.
+%% SL: Alternative text... do we need to reincorporate any of this?
+%% =======
+%% We propose \MetHO, a simple solution to avoid effect variables.
+%% >>>>>>> 9501670fd5516e8f970ce3895cc2c5e410a92dbf
 %
 Our key idea is to impose an order on effects in effect contexts
 reflecting the order of handlers in the evaluation context.
@@ -471,11 +483,8 @@ rules reject the unsafe program below, which would allow the queue effect to
 leak~\cite[Section~2.10]{tang2025modal}.
 \begin{lstlisting}[style = metl,escapechar=\%]]
   handle f %\underline{(fun () -> do fork (fun () -> do enqueue ()))}% with
-  | return _ => fun () -> ()
-  | fork p _ => p
-  | yield _ _ => fun () -> ()
+    -- omitted code for handler clauses of yield and fork
 \end{lstlisting}
-%
 The modality \lstinline[style = metl]{<queue unit>} is
 \emph{relative}. Instead of replacing the ambient effect context,
 relative modalities extend it. Here, the modality adds the queue
@@ -489,6 +498,33 @@ effect context as the computation that yielded it, which contains
 \textsf{co}. For the same reason, there is no need for a distinct type
 of processes, which are plain functions. The scheduler does not rely
 on a modality-parameterised handler and has the following type.
+%% SL: Alternative text... do we need to reincorporate any of this?
+%% =======
+%% a \emph{relative} modality, which extends the ambient effect context
+%% with \lstinline{queue unit}.
+%% %
+%% As a result, the effect context for the underlined thunk would be
+%% \lstinline[style = metl]{queue unit, co}.
+%% %
+%% From this ordering, \MetHO knows that the queue effect would not be
+%% available when the child process is called at the handler of
+%% \textsf{fork}, rejecting this program.
+%% %
+%% % Here, the modality
+%% % adds the queue effect in front of the effect context of the underlined
+%% % thunk. The ordering condition ensure that \textsf{fork} cannot be
+%% % performed in this context, where it is not first.
+%% >>>>>>
+
+%% The signature of \textsf{fork} does not mention the \textsf{co}
+%% effect, because the thunk will have the same ambient effect context as
+%% the computation that yielded it, which contains effect \textsf{co}.
+%% %
+%% We can further eliminate the \lstinline{proc} datatype and just use
+%% plain functions.
+%% %
+%% The scheduler does not need a modality-parameterised handler and
+%% has the following type.
 \begin{lstlisting}[style=metl]
   [queue (unit -> unit)](<co>(unit -> unit) -> unit)
 \end{lstlisting}
@@ -531,9 +567,9 @@ higher-order operations to come from the first effect in the context.
 %%   finish with some kind of convincing conclusion, takeaway message, or
 %%   exciting proposal for future work.}
 
-\wenhao{Would it make sense to modify the implementation to automatically
-wrap the argument when calling higher-order fork, instead of requiring
-the effect to be the first?}
+%% \wenhao{Would it make sense to modify the implementation to automatically
+%% wrap the argument when calling higher-order fork, instead of requiring
+%% the effect to be the first?}
 
 \printbibliography
 \appendix
