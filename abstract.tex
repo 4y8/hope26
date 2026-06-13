@@ -65,6 +65,8 @@
 \newcommand{\Do}{\keyw{do}\;}
 \usepackage{xspace}
 \newcommand{\Met}{\textsc{Met}\xspace}
+\newcommand{\MetHO}{$\Met^\sharp$\xspace}
+\newcommand{\MetVar}{$\Met^\epsilon$\xspace}
 
 \usepackage{fontawesome5}
 \newcommand{\lock}{\textsf{\scriptsize\faLock}}
@@ -228,12 +230,12 @@ over the effects that the child process might perform.
 
 Modal effect types (\Met) provide an elegant way to avoid effect variables for
 higher-order functions, but still requires effect variables for higher-order
-operations such as higher-order fork. We call $\Met^\epsilon$ the system
+operations such as higher-order fork. We call \MetVar the system
 obtained by adding effect variables to \Met.
 %
 In the rest of this extended abstract, we briefly describe implementations of
-higher-order fork in existing effect systems (Koka, Frank, Effekt, and $\Met^\epsilon$),
-demonstrate why effect variables are needed, and introduce $\Met^\textsf{HO}$ a
+higher-order fork in existing effect systems (Koka, Frank, Effekt, and \MetVar),
+demonstrate why effect variables are needed, and introduce \MetHO a
 simple extension to \Met which enables us to write higher-order fork using modal
 effect types without effect variables.
 
@@ -289,7 +291,7 @@ might use, we must introduce an explicit capability variable, which
 is reminiscent of the effect variables in Koka and \textsc{Met}.
 
 
-\section{Higher-order fork in $\Met^\epsilon$}
+\section{Higher-order fork in \MetVar}
 \label{sec:met}
 
 Modal effect types (\textsc{Met}) decouple effects from function types
@@ -393,7 +395,7 @@ continuation can perform with an absolute modality.
 % \texttt{\small c}.
 % %
 
-\section{Higher-order fork in $\Met^\textsf{HO}$}
+\section{Higher-order fork in \MetHO}
 
 
 %% SL: mostly resolved
@@ -426,7 +428,7 @@ Section~\ref{sec:met}, and consequently, we must bring back effect
 variables to be parameterised over the effects that the closure might
 perform.
 
-We propose $\Met^\textsf{HO}$, a simple solution following this observation.
+We propose \MetHO, a simple solution following this observation.
 %
 Our key idea is to impose an ordering on effects in effect contexts so
 that this order reflects the order of their handlers in the evaluation
@@ -451,11 +453,11 @@ are exactly those that follow the fork effect in the effect context.
 With our new solution, the cooperative concurrency effect is defined
 as follows.
 \begin{lstlisting}[style=metl]
-  eff! co = fork : (unit -> unit) => unit
+  eff# co = fork : (unit -> unit) => unit
           | yield : unit => unit
 \end{lstlisting}
-The bang indicates that \textsf{co} is a higher order-effect, allowing
-\textsf{fork} to take as input a function.
+The hash (\texttt{\small \#}) indicates that \textsf{co} is a higher
+order-effect, allowing \textsf{fork} to take as input a function.
 %
 %% SL: I think the following is now resolved
 %
@@ -489,11 +491,11 @@ the following type.
   [queue (unit -> unit)](<co>(unit -> unit) -> unit)
 \end{lstlisting}
 
-In summary, $\Met^\textsf{HO}$ offers a structural way to fix the set of effects
+In summary, \MetHO offers a structural way to fix the set of effects
 the operands of an operation can perform. In the case of higher-order fork, this
 new system eliminates the need for effect variables entirely. Future work includes:
 extending modalities to also act on effects to increase the flexibility of
-$\Met^\textsf{HO}$, and inserting masks instead of requiring higher-order
+\MetHO, and inserting masks instead of requiring higher-order
 operations to come from the first effect in the context.
 %% Another difference with the implementations of Section~\ref{impl} is
 %% the absence of masking.
@@ -538,7 +540,7 @@ the effect to be the first?}
 \lstinputlisting[style=koka]{app/koka.kk}
 \section{Frank}
 \lstinputlisting[style=frank]{app/frank.fk}
-\section{$\Met^\epsilon$}
+\section{\MetVar}
 \lstinputlisting[style=metl]{app/metl-eff-var.met}
 
 \section{Effekt}
@@ -591,7 +593,7 @@ We have not managed to use a queue effect to store our thunks. To do so, we
 would must store in a queue a thunk that captures the queue capability
 itself. However, we could not implement such a queue while staying in Effekt's
 lexical requirements.
-\section{\textsc{Metl} with higher-order effects}
+\section{\MetHO}
 % \subsection{Implementation}
 \lstinputlisting[style=metl]{app/metl-ho-eff.met}
 
