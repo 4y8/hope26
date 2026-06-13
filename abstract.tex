@@ -407,8 +407,10 @@ continuation can perform with an absolute modality.
 
 As we have seen, in order to implement a higher-order fork effect that
 allows the child process to perform any effect, we have to use effect
-variables either explicitly or implicitly in most of the existing
-effect systems such as Koka, Frank, Effekt, and \textsc{Met}.
+variables either explicitly or implicitly in existing effect systems.
+%% SL: space-saving
+%
+%% such as Koka, Frank, Effekt, and \textsc{Met} .
 %
 This is particularly unsatisfactory for \textsc{Met}, as \textsc{Met}
 is designed to avoid effect variables.
@@ -429,15 +431,14 @@ the child process via an absolute modality as in
 Section~\ref{sec:met}, and consequently, we use effect variables to
 parameterise over over the effects that the closure might perform.
 
-We propose \MetHO, a simple solution following this observation.
+Following this observation, We propose \MetHO.
 %
-Our key idea is to impose an ordering on effects in effect contexts so
-that this order reflects the order of their handlers in the evaluation
-context.
+Our key idea is to impose an order on effects in effect contexts
+reflecting the order of handlers in the evaluation context.
 %
 As a result, when we call a higher-order operation such as fork, the
-effects that would still be available when the child process is called
-are exactly those that follow the \textsf{co} effect in the effect context.
+effects available when the child process is called are exactly those
+that follow the \textsf{co} effect in the effect context.
 %
 %% SL: mostly resolved
 %
@@ -481,14 +482,13 @@ relative modalities extend it. Here, the modality adds the queue
 effect in front of the effect context of the underlined thunk. The
 ordering condition ensures that \textsf{fork} cannot be performed in
 this context, where it is not first.
-
+%
 Unlike in previous implementations, the signature of \textsf{fork}
-does not mention the \textsf{co} effect. In fact, the thunk will have
-the same ambient effect context as the computation that yielded it,
-which contains effect \textsf{co}. For the same reason, there is no
-need for a distinct type of processes, which are plain functions. The
-scheduler does not rely on a modality-parameterised handler and has
-the following type.
+does not mention \textsf{co}. In fact, the thunk has the same ambient
+effect context as the computation that yielded it, which contains
+\textsf{co}. For the same reason, there is no need for a distinct type
+of processes, which are plain functions. The scheduler does not rely
+on a modality-parameterised handler and has the following type.
 \begin{lstlisting}[style=metl]
   [queue (unit -> unit)](<co>(unit -> unit) -> unit)
 \end{lstlisting}
