@@ -236,7 +236,6 @@ Frank, Effekt, and \Met), demonstrate why effect variables are needed,
 and introduce a simple extension to \Met which enables us to write
 higher-order fork using modal effect types without effect variables.
 
-
 \section{Higher-order fork in existing languages}\label{impl}
 
 In this section, we outline implementations of a cooperative
@@ -477,6 +476,11 @@ the following type.
 \begin{lstlisting}[style=metl]
   [queue (unit -> unit)](<co>(unit -> unit) -> unit)
 \end{lstlisting}
+
+
+Our new rules offer a structural way to fix the set of effects the operands of
+an operation can perform. In the case of higher-order fork, they can replace
+effect variables.
 %% Another difference with the implementations of Section~\ref{impl} is
 %% the absence of masking.
 %
