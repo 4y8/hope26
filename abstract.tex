@@ -429,7 +429,7 @@ the handler of fork.
 As a result, we must fully specify which effects may be performed by
 the child process via an absolute modality as in
 Section~\ref{sec:met}, and consequently, we use effect variables to
-parameterise over over the effects that the closure might perform.
+parameterise over over the effects that the child process might perform.
 %
 % As a result, we must fully specify which effects might be performed by
 % the child process with an absolute modality as in
@@ -485,12 +485,7 @@ The modality \lstinline[style = metl]{<queue unit>} is
 % ordering condition ensures that \textsf{fork} cannot be performed in
 % this context, where it is not first.
 % %
-% Unlike in previous implementations, the signature of \textsf{fork}
-% does not mention \textsf{co}. In fact, the thunk has the same ambient
-% effect context as the computation that yielded it, which contains
-% \textsf{co}. For the same reason, there is no need for a distinct type
-% of processes, which are plain functions. The scheduler does not rely
-% on a modality-parameterised handler and has the following type.
+
 a \emph{relative} modality, which extends the ambient effect context
 with \lstinline{queue unit}.
 %
@@ -501,15 +496,15 @@ From this ordering, \MetHO knows that the queue effect would not be
 available when the child process is called at the handler of
 \textsf{fork}, rejecting this program.
 
-%% The signature of \textsf{fork} does not mention the \textsf{co}
-%% effect, because the thunk will have the same ambient effect context as
-%% the computation that yielded it, which contains effect \textsf{co}.
-%% %
-%% We can further eliminate the \lstinline{proc} datatype and just use
-%% plain functions.
-%% %
-%% The scheduler does not need a modality-parameterised handler and
-%% has the following type.
+The signature of \textsf{fork} does not mention the \textsf{co}
+effect, because the thunk will have the same ambient effect context as
+the computation that yielded it, which contains effect \textsf{co}.
+%
+We can further eliminate the \lstinline{proc} datatype and just use
+plain functions.
+%
+The scheduler does not need a modality-parameterised handler and
+has the following type.
 \begin{lstlisting}[style=metl]
   [queue (unit -> unit)](<co>(unit -> unit) -> unit)
 \end{lstlisting}
