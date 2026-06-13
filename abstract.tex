@@ -218,7 +218,7 @@ Traditional effect systems annotate function arrows with effects, so the
 argument type $(\textsf{unit} \to \textsf{unit})$ of \textsf{fork} would
 typically be annotated with the effects that the child process might
 perform. Annotating arrows with the effects they can perform between square
-brackets, a suitable scheduler could have a type a long the lines:
+brackets, a suitable scheduler could have a type along the lines:
 \begin{lstlisting}[style=metl]
   forall e . (unit ->[co e, queue (proc e), e] unit)
     ->[co e, queue (proc e), e] unit
@@ -304,7 +304,7 @@ via modalities~\cite{tang2025modal, tang2026modal} and enable type
 signatures similarly succinct to Frank's without relying on fragile
 syntactic sugar.
 %
-The central notions of \text{Met} are the \emph{effect context}, which
+The central notions of \textsc{Met} are the \emph{effect context}, which
 determines the effects provided by the environment, and
 \emph{modalities}, which transform the effect context.
 %
@@ -479,35 +479,27 @@ leak~\cite[Section~2.10]{tang2025modal}.
     | fork p _ => p -- we omit the other clauses
 \end{lstlisting}
 The modality \lstinline[style = metl]{<queue unit>} is
-\emph{relative}. Instead of replacing the ambient effect context,
-relative modalities extend it. Here, the modality adds the queue
-effect in front of the effect context of the underlined thunk. The
-ordering condition ensures that \textsf{fork} cannot be performed in
-this context, where it is not first.
+% \emph{relative}. Instead of replacing the ambient effect context,
+% relative modalities extend it. Here, the modality adds the queue
+% effect in front of the effect context of the underlined thunk. The
+% ordering condition ensures that \textsf{fork} cannot be performed in
+% this context, where it is not first.
+% %
+% Unlike in previous implementations, the signature of \textsf{fork}
+% does not mention \textsf{co}. In fact, the thunk has the same ambient
+% effect context as the computation that yielded it, which contains
+% \textsf{co}. For the same reason, there is no need for a distinct type
+% of processes, which are plain functions. The scheduler does not rely
+% on a modality-parameterised handler and has the following type.
+a \emph{relative} modality, which extends the ambient effect context
+with \lstinline{queue unit}.
 %
-Unlike in previous implementations, the signature of \textsf{fork}
-does not mention \textsf{co}. In fact, the thunk has the same ambient
-effect context as the computation that yielded it, which contains
-\textsf{co}. For the same reason, there is no need for a distinct type
-of processes, which are plain functions. The scheduler does not rely
-on a modality-parameterised handler and has the following type.
-%% SL: Alternative text... do we need to reincorporate any of this?
-%% =======
-%% a \emph{relative} modality, which extends the ambient effect context
-%% with \lstinline{queue unit}.
-%% %
-%% As a result, the effect context for the underlined thunk would be
-%% \lstinline[style = metl]{queue unit, co}.
-%% %
-%% From this ordering, \MetHO knows that the queue effect would not be
-%% available when the child process is called at the handler of
-%% \textsf{fork}, rejecting this program.
-%% %
-%% % Here, the modality
-%% % adds the queue effect in front of the effect context of the underlined
-%% % thunk. The ordering condition ensure that \textsf{fork} cannot be
-%% % performed in this context, where it is not first.
-%% >>>>>>
+As a result, the effect context for the underlined thunk would be
+\lstinline[style = metl]{queue unit, co}.
+%
+From this ordering, \MetHO knows that the queue effect would not be
+available when the child process is called at the handler of
+\textsf{fork}, rejecting this program.
 
 %% The signature of \textsf{fork} does not mention the \textsf{co}
 %% effect, because the thunk will have the same ambient effect context as
