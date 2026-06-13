@@ -164,8 +164,7 @@ signatures with a fat arrow).
 The continuation receives a boolean for distinguishing the parent and
 child in the following code.
 \begin{lstlisting}[style=metl]
-  if do fork () then print "parent"
-                else print "child"
+  if do fork () then print "parent" else print "child"
 \end{lstlisting}
 %
 UNIX fork relies on multi-shot continuations, so is unsuitable for
@@ -436,7 +435,7 @@ context.
 %
 As a result, when we call a higher-order operation such as fork, the
 effects that would still be available when the child process is called
-are exactly those that follow the fork effect in the effect context.
+are exactly those that follow the \textsf{co} effect in the effect context.
 
 %% SL: mostly resolved
 %
