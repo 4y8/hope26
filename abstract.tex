@@ -159,9 +159,9 @@ There are two canonical forms of fork operation we might consider.
   notation in both places!}
 
 The first form of fork is a UNIX(-style) fork operation of type
-$\textsf{unit} \twoheadrightarrow
+$\textsf{unit} \Rightarrow
 \textsf{bool}$~\cite{hillerstrom2021thesis} (we denote operation
-signatures with a double-headed arrow).
+signatures with a fat arrow).
 %
 The continuation receives a boolean for distinguishing the parent and
 child in the following code.
@@ -175,7 +175,7 @@ programming languages that support only single-shot
 continuations~\cite{ocamleffect2021, wasmeffect2023}.
 
 The second form of fork is a higher-order fork operation of type
-$(\textsf{unit} \to \textsf{unit}) \twoheadrightarrow
+$(\textsf{unit} \to \textsf{unit}) \Rightarrow
 \textsf{unit}$~\cite{dolan2015effective, ocamleffect2021}.
 %
 % By taking an alternative approach, one can in fact implement
@@ -355,12 +355,12 @@ Then, the scheduler has the following type.
     ([co e, queue (proc e), e](unit -> unit) -> unit)
 \end{lstlisting}
 
-Because each arrow has an absolute modality, this signature is similar
-to the Koka one, and loses the advantages of modal effect
-types. Moreover, this implementation relies on a
-\emph{modality-parameterised
-  handler}~\cite[Section~3.5]{tang2026modal} to give a type with an
-absolute modality to the continuation.
+Because each arrow has an absolute modality, this signature is similar to the
+Koka one, and loses the advantages of modal effect types. Moreover, this
+implementation relies on a \emph{modality-parameterised
+handler}~\cite[Section~3.5]{tang2026modal}. These handlers wrap the continuation
+with a user-supplied modality. Here, this allows to fix the effects the
+continuation can perform with an absolute modality.
 
 \sam{There are two many definitions missing here for this to be
   properly understood. What even is a modality? What is a
@@ -466,7 +466,7 @@ as follows.
   eff! co = fork : (unit -> unit) => unit
           | yield : unit => unit
 \end{lstlisting}
-The bang indicates that operations can yield and receive any value.
+The bang indicates that \textsf{co} is a higher order-effect.
 %
 \sam{This description of bang is entirely opaque. Most readers will
   have no idea what it is intended to mean.}
@@ -481,8 +481,12 @@ the following type.
 \begin{lstlisting}[style=metl]
   [queue (unit -> unit)](<co>(unit -> unit) -> unit)
 \end{lstlisting}
-Another difference with the implementations of Section~\ref{impl} is
-the absence of masking.
+The type \lstinline[style = metl]{<co>(unit -> unit)} has a \emph{relative}
+modality. Instead of replacing the ambient effect context with an independent
+one, relative modalities extend it. Here, \lstinline[style = metl]{<co>} adds
+the \textsf{co} effect in front of the effect context.
+%% Another difference with the implementations of Section~\ref{impl} is
+%% the absence of masking.
 %
 \sam{This is perplexing. We haven't said anything about
   masking. Perhaps this is because of shipping code to the
@@ -490,14 +494,14 @@ the absence of masking.
   about it. Ideally we'd try to avoid talking about it in the body of
   the paper though.}
 %
-The semantics wraps the operands of higher-order effects with the same
-masks as the yielding evaluation context. The first call to the
-scheduler still masks the \textsf{queue} effect.
-\begin{lstlisting}[style=metl]
-  val full_schedule : [](<co>(unit -> unit) -> unit)
-  let full_schedule m =
-    queue { schedule { mask<queue> (m!) } }
-\end{lstlisting}
+%% The semantics wraps the operands of higher-order effects with the same
+%% masks as the yielding evaluation context. The first call to the
+%% scheduler still masks the \textsf{queue} effect.
+%% \begin{lstlisting}[style=metl]
+%%   val full_schedule : [](<co>(unit -> unit) -> unit)
+%%   let full_schedule m =
+%%     queue { schedule { mask<queue> (m!) } }
+%% \end{lstlisting}
 
 %% SL: This is true, but not particularly interesting
 %
