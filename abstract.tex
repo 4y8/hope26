@@ -474,11 +474,13 @@ leak~\cite[Section~2.10]{tang2025modal}.
   | fork p _ => p
   | yield _ _ => fun () -> ()
 \end{lstlisting}
-The modality \lstinline[style = metl]{<queue unit>} is \emph{relative}. Instead
-of replacing the ambient effect context with an independent one, relative
-modalities extend it. Here, the modality adds the queue effect in front of the
-effect context of the underlined thunk. The ordering condition ensure that
-\textsf{fork} cannot be performed in this context, where it is not first.
+%
+The modality \lstinline[style = metl]{<queue unit>} is
+\emph{relative}. Instead of replacing the ambient effect context,
+relative modalities extend it. Here, the modality adds the queue
+effect in front of the effect context of the underlined thunk. The
+ordering condition ensures that \textsf{fork} cannot be performed in
+this context, where it is not first.
 
 Unlike in previous implementations, the signature of \textsf{fork}
 does not mention the \textsf{co} effect. In fact, the thunk will have
