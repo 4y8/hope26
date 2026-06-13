@@ -213,10 +213,15 @@ track of the effects in its parameter.
 %% theories~\cite{KammarLLMS26}, meanwhile presenting extra challenges
 %% for effect systems.
 %
-Traditional effect systems annotate function arrows with effects, so
-the argument type $(\textsf{unit} \to \textsf{unit})$ of \textsf{fork}
-would typically be annotated with the effects that the child process
-might perform.
+Traditional effect systems annotate function arrows with effects, so the
+argument type $(\textsf{unit} \to \textsf{unit})$ of \textsf{fork} would
+typically be annotated with the effects that the child process might
+perform. Annotating arrows with the effects they can perform between square
+brackets, a scheduler would have a type looking like:
+\begin{lstlisting}[style=metl]
+  forall e . (unit ->[co e, queue (proc e), e] unit)
+    ->[co e, queue (proc e), e] unit
+\end{lstlisting}
 %
 As a result, we must use effect variables if we want to parameterise
 over the effects that the child process might perform.
@@ -330,8 +335,8 @@ Then, the scheduler has the following type.
 \end{lstlisting}
 
 Because each arrow has an absolute modality, this signature is similar to the
-Koka one, and loses the advantages of modal effect types. Moreover, this
-implementation relies on a \emph{modality-parameterised
+one in the introduction, and loses the advantages of modal effect
+types. Moreover, this implementation relies on a \emph{modality-parameterised
 handler}~\cite[Section~3.5]{tang2026modal}. These handlers wrap the continuation
 with a user-supplied modality. Here, this allows to fix the effects the
 continuation can perform with an absolute modality.
@@ -594,7 +599,7 @@ signatures.
   Extensions & $D$ & ::= & $\cdot\mid\ell,D$\\
   Effect Contexts & $E,F$ & ::= & $\cdot\mid\ell,E$\\
   Label Contexts & $\Sigma$ & ::= &
-  $\cdot\mid\ell:A\twoheadrightarrow^Y B,\Sigma$\\
+  $\cdot\mid\ell:A\Rightarrow^Y B,\Sigma$\\
 \end{tabular}
 \end{center}
 The extension equivalence rules fix the position of sharp signatures. Effect
@@ -629,12 +634,12 @@ The rules for $\keyw{do}$ ensure that a sharp operation is available only if it 
   \inferrule[\textsc{T-DoFlat}]
     {E = D,\ell,F\\
      \ell\not\in D\\
-     \Sigma\ni\ell:A\twoheadrightarrow^\flat B\\
+     \Sigma\ni\ell:A\Rightarrow^\flat B\\
      \Gamma\vdash N:A \;@\; E}
     {\Gamma\vdash\Do\ell\; N:B \;@\; E}
 
   \inferrule[\textsc{T-DoSharp}]
-    {\Sigma\ni\ell:A\twoheadrightarrow^\sharp B\\
+    {\Sigma\ni\ell:A\Rightarrow^\sharp B\\
      \Gamma\vdash N:A \;@\; \ell,E}
     {\Gamma\vdash\Do\ell\; N:B \;@\; \ell,E}
 \end{mathpar}
@@ -645,7 +650,7 @@ modalities.
 \begin{mathpar}
   \inferrule[\textsc{T-HandleSharp}]
     {\Gamma,\lock_{{\langle|\ell\rangle}_E}\vdash M:A\;@\;\ell,F\\
-     \Sigma\ni\ell:A'\twoheadrightarrow^\sharp B'\\
+     \Sigma\ni\ell:A'\Rightarrow^\sharp B'\\
      \Gamma, x:\langle\ell\rangle A\vdash N:B\; @\; F\\
      \Gamma, p:\langle\ell\rangle A', r:\langle\ell\rangle B'\to B\vdash
      N':B\; @\; F
